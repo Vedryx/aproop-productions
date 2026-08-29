@@ -35,10 +35,10 @@ export default function Contact() {
         </h2>
 
         <a
-          href="mailto:hello@aproopproduction.com"
+          href="mailto:hello@aproopproductions.com"
           className="mt-[clamp(30px,3.6vw,52px)] inline-flex items-center gap-3.5 border-b border-gold pb-2.5 font-display text-[clamp(22px,2.2vw,32px)] text-cream-2 hover:text-gold"
         >
-          hello@aproopproduction.com{" "}
+          hello@aproopproductions.com{" "}
           <span className="text-base text-gold">↗</span>
         </a>
 

@@ -18,7 +18,7 @@ const jost = Jost({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://aproopproduction.com"),
+  metadataBase: new URL("https://aproopproductions.com"),
   title: "Aproop Production — Ad Films, Documentaries, Short Films, Songs",
   description:
     "Aproop Production is a film studio crafting advertising films, documentaries, short films, songs and jingles. Good films aren't accidents.",
