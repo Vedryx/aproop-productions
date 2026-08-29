@@ -1,6 +1,18 @@
 import Eyebrow from "./Eyebrow";
 import SafeImg from "./SafeImg";
 
+/**
+ * Placeholder: the design calls for `/uploads/founders-cutout.png`, which has
+ * not been supplied yet. This is the Makers duo photo cropped to its subjects
+ * (the source is a 16:9 frame with wide transparent margins, which left the
+ * figures looking small in this column). Regenerate with:
+ *
+ *   python3 -c "from PIL import Image; i=Image.open('public/uploads/makers-bg.png').convert('RGBA'); i.crop(i.getbbox()).save('public/uploads/about-portrait.png')"
+ *
+ * Point this back at the cutout once it lands — `npm run assets` picks it up.
+ */
+const PORTRAIT = "/uploads/about-portrait.png";
+
 export default function About() {
   return (
     <section
@@ -11,7 +23,7 @@ export default function About() {
       <div>
         <Eyebrow top="03 / Synopsis" bottom="03 / About us" className="mb-7" />
         <SafeImg
-          src="/uploads/founders-cutout.png"
+          src={PORTRAIT}
           alt="Harish and Samruddhi"
           className="mx-auto mt-[clamp(6px,1vw,14px)] block h-auto w-full max-w-[460px]"
         />

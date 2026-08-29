@@ -45,9 +45,10 @@ npm run assets -- ~/some/folder   # or point it at a folder / .zip
 | `bhimbhaskara-keyart.jpg` | `Bhimbhaskara Song.png` | 1600px wide jpg — 39 MB → 320 KB |
 | `founders-cutout.png` | `founders-cutout.png` | 920px wide, alpha kept — **still missing** |
 
-`founders-cutout.png` is the cutout in the About section; that slot renders
-empty until it is supplied (`SafeImg` drops a missing image rather than showing
-a broken glyph). Drop it anywhere the script searches and re-run.
+`founders-cutout.png` is the cutout in the About section and has not been
+supplied. The Makers duo photo, cropped to its subjects, stands in for it as
+`about-portrait.png` — see the note at the top of `components/About.tsx` for how
+it is generated and how to switch back once the real cutout lands.
 
 Everything else (20 client logos, both logo marks) imported fine and lives in
 `public/logos/` and `public/uploads/`.
