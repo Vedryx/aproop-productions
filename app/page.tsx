@@ -1,17 +1,17 @@
-import About from "@/components/About";
-import Brands from "@/components/Brands";
-import Contact from "@/components/Contact";
-import Faq from "@/components/Faq";
-import Footer from "@/components/Footer";
-import HashScroll from "@/components/HashScroll";
-import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import IntroClap from "@/components/IntroClap";
-import Makers from "@/components/Makers";
-import Producer from "@/components/Producer";
-import Reveal from "@/components/Reveal";
-import Services from "@/components/Services";
-import Work from "@/components/Work";
+import About from "@/components/sections/About";
+import Brands from "@/components/sections/Brands";
+import Contact from "@/components/sections/Contact";
+import Faq from "@/components/sections/Faq";
+import Footer from "@/components/layout/Footer";
+import HashScroll from "@/components/system/HashScroll";
+import Header from "@/components/layout/Header";
+import Hero from "@/components/sections/Hero";
+import IntroClap from "@/components/system/IntroClap";
+import Makers from "@/components/sections/Makers";
+import Producer from "@/components/sections/Producer";
+import Reveal from "@/components/system/Reveal";
+import Services from "@/components/sections/Services";
+import Work from "@/components/sections/Work";
 
 export default function Home() {
   return (

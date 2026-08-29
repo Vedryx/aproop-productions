@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { phases } from "@/lib/data";
-import Eyebrow from "./Eyebrow";
+import Eyebrow from "@/components/ui/Eyebrow";
 
 export default function Services() {
   const [open, setOpen] = useState<Record<number, boolean>>({});
@@ -79,7 +79,7 @@ export default function Services() {
                   <span className="text-[12px] tracking-[0.2em] text-gold tabular-nums">
                     {p.num}
                   </span>
-                  <span className="text-[10.5px] uppercase tracking-[0.22em] text-muted-3">
+                  <span className="text-[11px] uppercase tracking-[0.22em] text-muted-3">
                     {p.stage}
                   </span>
                 </div>
@@ -152,7 +152,7 @@ export default function Services() {
                     type="button"
                     onClick={(e) => toggle(i, e.currentTarget)}
                     aria-expanded={isOpen}
-                    className="inline-block max-w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border-none bg-amber px-[17px] pb-3 pt-[11px] font-display text-[clamp(19px,1.75vw,30px)] font-semibold leading-[1.08] text-[#1a1408] transition-[transform,box-shadow,background] duration-100 hover:bg-[#e8bd55]"
+                    className="inline-block min-h-11 max-w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap rounded-lg border-none bg-amber px-[17px] pb-3 pt-[11px] font-display text-[clamp(19px,1.75vw,30px)] font-semibold leading-[1.08] text-[#1a1408] transition-[transform,box-shadow,background] duration-100 hover:bg-[#e8bd55]"
                     style={{ boxShadow: "0 6px 0 0 #a8781c", boxSizing: "border-box" }}
                   >
                     {p.title}

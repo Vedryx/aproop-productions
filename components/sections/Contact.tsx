@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import Eyebrow from "./Eyebrow";
+import Eyebrow from "@/components/ui/Eyebrow";
 
 const FIELD =
   "w-full box-border bg-transparent border-0 border-b border-[rgba(244,239,228,.18)] text-cream text-[17px] pb-3.5 pt-2 transition-colors duration-300 focus:border-gold";
 const LABEL =
-  "block text-[10.5px] uppercase tracking-[0.24em] text-muted mb-3";
+  "block text-[11px] uppercase tracking-[0.24em] text-muted mb-3";
 const SOCIAL =
-  "inline-flex items-center gap-2.5 text-[11.5px] uppercase tracking-[0.22em] text-muted-2 transition-colors duration-300 hover:text-gold";
+  "inline-flex min-h-11 items-center gap-2.5 py-3 text-[11.5px] uppercase tracking-[0.22em] text-muted-2 transition-colors duration-300 hover:text-gold";
 
 export default function Contact() {
   const [sent, setSent] = useState(false);

@@ -1,8 +1,8 @@
-import Eyebrow from "./Eyebrow";
-import SafeImg from "./SafeImg";
+import Eyebrow from "@/components/ui/Eyebrow";
+import SafeImg from "@/components/ui/SafeImg";
 
 const HELLO =
-  "mt-2 inline-flex items-center gap-2.5 border-b border-[rgba(193,86,58,.6)] pb-1.5 text-[11.5px] uppercase tracking-[0.22em] text-rust transition-colors hover:border-gold hover:text-gold";
+  "mt-2 inline-flex min-h-11 items-center gap-2.5 border-b border-[rgba(193,86,58,.6)] pb-1.5 pt-3 text-[11.5px] uppercase tracking-[0.22em] text-rust transition-colors hover:border-gold hover:text-gold";
 
 export default function Makers() {
   return (
@@ -35,8 +35,7 @@ export default function Makers() {
           alt="Harish Tarun and Samruddhi Kuchik"
           width={889}
           height={507}
-          className="ap-mkimg pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 opacity-95"
-          style={{ width: 889, height: 507, maxWidth: "none" }}
+          className="ap-mkimg"
         />
 
         <div
@@ -56,7 +55,7 @@ export default function Makers() {
           <h3 className="mb-0 mt-2.5 font-display text-[clamp(24px,2.1vw,32px)] font-medium text-cream-2">
             Harish Tarun
           </h3>
-          <span className="bg-gold px-4 py-[9px] text-[10.5px] font-semibold uppercase tracking-[0.2em] text-ink">
+          <span className="bg-gold px-4 py-[9px] text-[11px] font-semibold uppercase tracking-[0.2em] text-ink">
             Writer-Director, Founder
           </span>
           <a
@@ -79,7 +78,7 @@ export default function Makers() {
           <h3 className="m-0 font-display text-[clamp(24px,2.1vw,32px)] font-medium text-cream-2">
             Samruddhi Kuchik
           </h3>
-          <span className="flex h-[33px] w-[215px] items-center bg-gold px-4 text-[10.5px] font-semibold uppercase tracking-[0.2em] text-ink">
+          <span className="flex h-[33px] w-[215px] items-center bg-gold px-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-ink">
             Producer, Co-Founder
           </span>
           <p className="m-0 mt-2 w-full max-w-[62ch] text-left text-[12.5px] font-light leading-[1.62] text-muted">

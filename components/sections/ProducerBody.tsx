@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { projects } from "@/lib/producer";
-import PitchModal from "./PitchModal";
-import ProjectCard from "./ProjectCard";
+import PitchModal from "@/components/ui/PitchModal";
+import ProjectCard from "@/components/ui/ProjectCard";
 
 export default function ProducerBody() {
   const [pitch, setPitch] = useState(false);
@@ -23,7 +23,7 @@ export default function ProducerBody() {
           <button
             type="button"
             onClick={() => setPitch(true)}
-            className="cursor-pointer border-0 border-b border-gold bg-transparent pb-1 text-inherit text-gold transition-colors duration-300 hover:text-gold-light"
+            className="min-h-11 cursor-pointer border-0 border-b border-gold bg-transparent pb-1 pt-3 text-inherit text-gold transition-colors duration-300 hover:text-gold-light"
           >
             Pitch it to us ↗
           </button>

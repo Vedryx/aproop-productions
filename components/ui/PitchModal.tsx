@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useFocusTrap } from "./useFocusTrap";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 const FIELD =
   "w-full box-border bg-transparent border-0 border-b border-[rgba(244,239,228,.18)] text-cream text-[17px] pb-3.5 pt-2 transition-colors duration-300 focus:border-gold";
-const LABEL = "block text-[10.5px] uppercase tracking-[0.24em] text-muted mb-3";
+const LABEL = "block text-[11px] uppercase tracking-[0.24em] text-muted mb-3";
 
 export default function PitchModal({
   open,
@@ -61,7 +61,7 @@ export default function PitchModal({
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-3.5 top-3.5 flex h-10 w-10 cursor-pointer items-center justify-center border border-[rgba(244,239,228,.18)] bg-transparent text-base leading-none text-muted-2 transition-colors duration-300 hover:border-[rgba(217,178,60,.55)] hover:text-gold"
+          className="absolute right-3.5 top-3.5 flex h-11 min-h-11 w-11 min-w-11 cursor-pointer items-center justify-center border border-[rgba(244,239,228,.18)] bg-transparent text-base leading-none text-muted-2 transition-colors duration-300 hover:border-[rgba(217,178,60,.55)] hover:text-gold"
         >
           ✕
         </button>

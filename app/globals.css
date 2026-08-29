@@ -468,8 +468,33 @@ header[data-top="yes"] .ap-burger span {
   transform: translateY(-6.5px) rotate(-45deg);
 }
 
-/* ---------------- responsive ---------------- */
-@media (max-width: 960px) {
+/* Makers photo. Positioning lives here rather than in Tailwind utilities:
+   v4 emits `translate` for -translate-x-1/2, which an override in this file
+   could not reliably cancel, leaving the photo shifted half its width once the
+   section stacked. One owner, two states. */
+.ap-mkimg {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  translate: -50% 0;
+  width: 889px;
+  height: 507px;
+  max-width: none;
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+/* ---------------- responsive ----------------
+   Four tiers, used consistently everywhere:
+     1024  desktop  -> tablet   (multi-column sections collapse)
+      768  tablet   -> phone    (header switches to the drawer)
+      640  phone                (work grid goes single column)
+      480  small phone          (logo plate and tab grid shrink)
+   The canvas shipped seven ad-hoc max-widths (960/900/860/760/720/660/420),
+   which made neighbouring sections restack at different points on resize. */
+
+@media (max-width: 1024px) {
+  /* Header collapses to the burger. */
   .ap-hbar {
     height: 74px !important;
     padding-top: 0 !important;
@@ -506,48 +531,13 @@ header[data-top="yes"] .ap-burger span {
   .ap-drawer {
     display: grid !important;
   }
-  .ap-mkrow {
-    grid-template-columns: 1fr !important;
-    min-height: 0 !important;
-  }
-  .ap-mkimg {
-    position: static !important;
-    order: -1;
-    transform: none !important;
-    height: auto !important;
-    width: 100% !important;
-    max-width: 560px !important;
-    margin: 0 auto;
-  }
-  .ap-mkcol {
-    align-self: auto !important;
-    padding: 0 !important;
-    justify-self: start !important;
-    max-width: none !important;
-    align-items: flex-start !important;
-    text-align: left !important;
-  }
-}
 
-@media (max-width: 420px) {
-  .ap-plate {
-    height: 96px !important;
-    padding: 7px 38px 20px 14px !important;
-    border-radius: 0 0 54px 0 !important;
-  }
-  .ap-plogo {
-    height: 54px !important;
-  }
-}
-
-@media (max-width: 720px) {
-  .ap-qarr {
-    display: none !important;
-  }
-}
-
-@media (max-width: 900px) {
-  .ap-sgrid {
+  /* Every multi-column section collapses at the same point. */
+  .ap-sgrid,
+  .ap-cfgrid,
+  .bp-card,
+  #contact,
+  #about {
     grid-template-columns: minmax(0, 1fr) !important;
   }
   .ap-phase {
@@ -559,28 +549,76 @@ header[data-top="yes"] .ap-burger span {
   .ap-phase [data-stroke] {
     display: none !important;
   }
-}
-
-@media (max-width: 860px) {
-  .ap-cfgrid,
-  #contact,
-  #about {
-    grid-template-columns: minmax(0, 1fr) !important;
+  .bp-card > div:last-child {
+    border-left: none !important;
+    border-top: 1px solid rgba(244, 239, 228, 0.09);
   }
   #about img {
     max-width: 380px;
   }
+
+  /* Makers: the absolutely-placed photo becomes a normal centred block. */
+  .ap-mkrow {
+    grid-template-columns: minmax(0, 1fr) !important;
+    min-height: 0 !important;
+    justify-items: center;
+  }
+  .ap-mkimg {
+    position: static;
+    order: -1;
+    translate: none;
+    width: 100%;
+    height: auto;
+    max-width: min(560px, 100%);
+    margin: 0 auto 8px;
+  }
+  .ap-mkcol {
+    align-self: auto !important;
+    padding: 0 !important;
+    justify-self: stretch !important;
+    max-width: none !important;
+    align-items: flex-start !important;
+    text-align: left !important;
+    width: 100%;
+  }
+  .ap-mkcol > * {
+    text-align: left !important;
+  }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .ap-2col {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
 
-@media (max-width: 660px) {
+@media (max-width: 640px) {
   .ap-wgrid {
     grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .ap-plate {
+    height: 96px !important;
+    padding: 7px 38px 20px 14px !important;
+    border-radius: 0 0 54px 0 !important;
+  }
+  .ap-plogo {
+    height: 54px !important;
+  }
+  /* Two chips per row instead of five stacked rows. */
+  .ap-cats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .ap-cats button {
+    white-space: normal !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+  /* Producer header: drop the section label so the logo and link fit on one line. */
+  .bp-hdr-label {
+    display: none !important;
   }
 }
 
@@ -672,15 +710,4 @@ input.ap-range::-moz-range-thumb {
   background: #d9b23c;
   border: 3px solid #131211;
   box-shadow: 0 0 0 1px rgba(217, 178, 60, 0.7);
-}
-
-/* The canvas has no breakpoints; stack the funding panel under the film. */
-@media (max-width: 900px) {
-  .bp-card {
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
-  .bp-card > div:last-child {
-    border-left: none !important;
-    border-top: 1px solid rgba(244, 239, 228, 0.09);
-  }
 }

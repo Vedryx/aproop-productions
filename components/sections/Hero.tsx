@@ -62,7 +62,7 @@ export default function Hero() {
         type="button"
         onClick={toggleMute}
         aria-label={muted ? "Unmute the video" : "Mute the video"}
-        className="absolute bottom-[clamp(74px,7.4vw,104px)] right-[clamp(20px,4vw,56px)] z-[2] flex h-[42px] w-[42px] cursor-pointer items-center justify-center rounded-full border border-[rgba(244,239,228,.34)] bg-[rgba(11,10,9,.34)] p-0 text-cream backdrop-blur-[6px] transition-all duration-300 hover:scale-[1.08] hover:border-amber hover:bg-[rgba(11,10,9,.6)] hover:text-amber"
+        className="absolute bottom-[clamp(74px,7.4vw,104px)] right-[clamp(20px,4vw,56px)] z-[2] flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[rgba(244,239,228,.34)] bg-[rgba(11,10,9,.34)] p-0 text-cream backdrop-blur-[6px] transition-all duration-300 hover:scale-[1.08] hover:border-amber hover:bg-[rgba(11,10,9,.6)] hover:text-amber"
       >
         {muted ? (
           <svg
@@ -110,7 +110,7 @@ export default function Hero() {
 
       <a
         href="#work"
-        className="absolute bottom-[clamp(26px,3.4vw,44px)] right-[clamp(20px,4vw,56px)] flex items-center gap-3.5 text-[11px] font-medium uppercase tracking-[0.26em] text-cream no-underline transition-colors duration-300 hover:text-amber"
+        className="absolute bottom-[clamp(20px,3.4vw,38px)] right-[clamp(14px,4vw,50px)] flex min-h-11 items-center gap-3.5 px-1.5 py-3 text-[11px] font-medium uppercase tracking-[0.26em] text-cream no-underline transition-colors duration-300 hover:text-amber"
         style={{ textShadow: "0 2px 18px rgba(0,0,0,.6)" }}
       >
         Scroll down{" "}

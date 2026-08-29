@@ -1,5 +1,5 @@
-import Eyebrow from "./Eyebrow";
-import SafeImg from "./SafeImg";
+import Eyebrow from "@/components/ui/Eyebrow";
+import SafeImg from "@/components/ui/SafeImg";
 
 /**
  * Placeholder: the design calls for `/uploads/founders-cutout.png`, which has

@@ -15,9 +15,25 @@ npm run lint
 | --- | --- |
 | `app/page.tsx` | The one-page site — sections composed in design order |
 | `app/be-the-producer/page.tsx` | `Be the Producer.dc.html` — open projects + funding panels |
-| `app/globals.css` | Design tokens (`@theme`), keyframes, header/drawer and reveal CSS |
-| `lib/data.ts` | Film shelves, testimonials, FAQ, service phases, nav |
-| `components/` | One file per section, plus `Reveal`, `VideoModal`, `Poster`, `SafeImg` |
+| `app/globals.css` | Design tokens (`@theme`), keyframes, and the responsive layer |
+| `app/robots.ts`, `app/sitemap.ts` | Generated at build time |
+| `components/layout/` | `Header`, `Footer`, `ProducerHeader` |
+| `components/sections/` | One file per page section |
+| `components/ui/` | Reusable pieces — `Eyebrow`, `SafeImg`, `Poster`, modals, `ProjectCard` |
+| `components/system/` | Behaviour with no markup — `Reveal`, `HashScroll`, `IntroClap` |
+| `hooks/` | `useFocusTrap` |
+| `lib/` | Content: film shelves, testimonials, FAQ, service phases, projects |
+
+### Breakpoints
+
+Four tiers, applied consistently in `app/globals.css`:
+
+| width | what changes |
+| --- | --- |
+| `1024` | header collapses to the drawer; every multi-column section stacks |
+| `768` | two-column heading blocks stack |
+| `640` | work grid goes single column |
+| `480` | logo plate shrinks; category chips go two-up |
 
 Film stills are pulled straight from YouTube (`img.youtube.com`) and step down
 through `maxresdefault → hq720 → hqdefault` when a rendition is missing, so the

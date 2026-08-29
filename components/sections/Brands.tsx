@@ -88,7 +88,7 @@ export default function Brands() {
   const anim = `${dir}${q % 2 ? "a" : "b"}`;
 
   const arrow =
-    "ap-qarr absolute top-1/2 z-[2] flex h-[46px] w-[46px] -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[rgba(217,178,60,.5)] bg-transparent font-body text-[17px] leading-none text-gold transition-colors duration-300 hover:border-gold hover:bg-gold hover:text-ink";
+    "absolute top-1/2 z-[2] flex h-[46px] w-[46px] -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[rgba(217,178,60,.5)] bg-transparent font-body text-[17px] leading-none text-gold transition-colors duration-300 hover:border-gold hover:bg-gold hover:text-ink";
 
   return (
     <section id="brands" data-screen-label="Brands" className="bg-ink-deep">
@@ -159,16 +159,21 @@ export default function Brands() {
           </div>
         </div>
 
-        <div className="mt-[34px] flex justify-center gap-2.5">
+        <div className="mt-[22px] flex justify-center gap-1">
           {testimonials.map((_, i) => (
             <button
               key={i}
               type="button"
               onClick={() => go(i, i > q ? "r" : "l")}
               aria-label={`Show quote ${i + 1}`}
-              className="h-[9px] w-[9px] cursor-pointer rounded-full border border-gold p-0 transition-colors duration-300"
-              style={{ background: q === i ? "#d9b23c" : "transparent" }}
-            />
+              className="flex h-11 w-11 flex-none cursor-pointer items-center justify-center border-0 bg-transparent p-0"
+            >
+              <span
+                aria-hidden="true"
+                className="block h-[9px] w-[9px] rounded-full border border-gold transition-colors duration-300"
+                style={{ background: q === i ? "#d9b23c" : "transparent" }}
+              />
+            </button>
           ))}
         </div>
       </div>

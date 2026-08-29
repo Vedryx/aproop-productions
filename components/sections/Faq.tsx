@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { faqData } from "@/lib/data";
-import Eyebrow from "./Eyebrow";
+import Eyebrow from "@/components/ui/Eyebrow";
 
 export default function Faq() {
   const [openIdx, setOpenIdx] = useState<number | null>(0);

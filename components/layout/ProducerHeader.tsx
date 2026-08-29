@@ -24,13 +24,13 @@ export default function ProducerHeader() {
           />
         </Link>
 
-        <span className="text-[12px] font-medium uppercase tracking-[0.26em] text-[#141414]">
+        <span className="bp-hdr-label text-[12px] font-medium uppercase tracking-[0.26em] text-[#141414]">
           Be the producer
         </span>
 
         <Link
           href="/#producer"
-          className="ml-auto flex items-center gap-2.5 text-[12px] font-medium uppercase tracking-[0.22em] text-[#141414] transition-colors duration-300 hover:text-[#a8781c]"
+          className="ml-auto flex min-h-11 items-center gap-2.5 py-3 text-[12px] font-medium uppercase tracking-[0.22em] text-[#141414] transition-colors duration-300 hover:text-[#a8781c]"
         >
           <span className="text-sm">↖</span> Back to the studio
         </Link>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useFocusTrap } from "./useFocusTrap";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 export type PlayTarget = { id: string; title: string; single?: boolean } | null;
 

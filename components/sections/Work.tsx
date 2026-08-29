@@ -2,9 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { shelfData, type Film, type Shelf } from "@/lib/data";
-import Eyebrow from "./Eyebrow";
-import Poster from "./Poster";
-import VideoModal, { type PlayTarget } from "./VideoModal";
+import Eyebrow from "@/components/ui/Eyebrow";
+import Poster from "@/components/ui/Poster";
+import VideoModal, { type PlayTarget } from "@/components/ui/VideoModal";
 
 const PER_PAGE = 4;
 
@@ -69,7 +69,7 @@ export default function Work() {
   };
 
   const chipBase =
-    "cursor-pointer font-body text-[11.5px] uppercase tracking-[0.2em] px-[18px] py-3 inline-flex items-center justify-center whitespace-nowrap transition-[color,border-color,background] duration-300";
+    "min-h-11 cursor-pointer font-body text-[11.5px] uppercase tracking-[0.2em] px-[18px] py-3 inline-flex items-center justify-center whitespace-nowrap transition-[color,border-color,background] duration-300";
 
   const cats = ["All", ...shelfData.map((s) => s.key)];
 
@@ -100,7 +100,7 @@ export default function Work() {
       <div
         role="tablist"
         aria-label="Work categories"
-        className="mb-[clamp(16px,2.2vh,32px)] grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2.5 border-y border-[rgba(217,178,60,.22)] py-[clamp(10px,1.4vh,16px)]"
+        className="ap-cats mb-[clamp(16px,2.2vh,32px)] grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2.5 border-y border-[rgba(217,178,60,.22)] py-[clamp(10px,1.4vh,16px)]"
       >
         {cats.map((label, i) => {
           const active = cat === label;
@@ -141,7 +141,7 @@ export default function Work() {
           <article
             key={c.key}
             data-reveal=""
-            className="relative flex h-[clamp(210px,min(34vw,29.5vh),366px)] flex-col border border-[rgba(244,239,228,.09)] bg-panel transition-all duration-500 hover:-translate-y-2 hover:border-[rgba(217,178,60,.55)] hover:shadow-[0_30px_60px_rgba(0,0,0,.5)]"
+            className="relative flex h-[clamp(300px,30vw,366px)] flex-col border border-[rgba(244,239,228,.09)] bg-panel transition-all duration-500 hover:-translate-y-2 hover:border-[rgba(217,178,60,.55)] hover:shadow-[0_30px_60px_rgba(0,0,0,.5)]"
           >
             <div className="relative h-[68%] flex-none overflow-hidden border-b border-[rgba(244,239,228,.09)] bg-ink-darker">
               <Poster vid={c.vid} alt={c.label} />
@@ -157,12 +157,12 @@ export default function Work() {
                 </span>
               </button>
 
-              <span className="absolute left-0 top-4 border-l-2 border-gold bg-[rgba(19,18,17,.86)] px-3 py-[7px] text-[10px] uppercase tracking-[0.22em] text-gold-soft tabular-nums">
+              <span className="absolute left-0 top-4 border-l-2 border-gold bg-[rgba(19,18,17,.86)] px-3 py-[7px] text-[11px] uppercase tracking-[0.22em] text-gold-soft tabular-nums">
                 {c.num} · {c.label}
               </span>
 
               {c.award && (
-                <span className="absolute bottom-4 left-0 bg-gold px-3 py-[7px] text-[10px] font-semibold uppercase tracking-[0.2em] text-ink">
+                <span className="absolute bottom-4 left-0 bg-gold px-3 py-[7px] text-[11px] font-semibold uppercase tracking-[0.2em] text-ink">
                   ★ Award winning
                 </span>
               )}
@@ -192,14 +192,14 @@ export default function Work() {
       {pageCount > 1 && (
         <nav
           aria-label="Work pages"
-          className="mt-[clamp(16px,2.1vh,30px)] flex items-center justify-center gap-[clamp(10px,1.4vw,22px)] tabular-nums"
+          className="mt-[clamp(16px,2.1vh,30px)] flex flex-wrap items-center justify-center gap-[clamp(6px,1.4vw,22px)] tabular-nums"
         >
           <button
             type="button"
             onClick={() => current > 0 && goPage(current - 1)}
             aria-label="Previous page"
             disabled={current === 0}
-            className={`border-none px-1.5 py-2 text-base leading-none transition-colors duration-300 ${
+            className={`flex h-11 w-11 flex-none items-center justify-center border-none text-base leading-none transition-colors duration-300 ${
               current > 0 ? "cursor-pointer text-gold" : "cursor-default text-[#4d4842]"
             }`}
           >
@@ -214,7 +214,7 @@ export default function Work() {
                 onClick={() => goPage(n)}
                 aria-label={`Page ${n + 1} of ${pageCount}`}
                 aria-current={on ? "page" : undefined}
-                className={`cursor-pointer px-[13px] py-[9px] text-[12px] tracking-[0.2em] tabular-nums transition-[color,border-color,background] duration-300 ${
+                className={`min-h-11 min-w-11 cursor-pointer px-[13px] py-[9px] text-[12px] tracking-[0.2em] tabular-nums transition-[color,border-color,background] duration-300 ${
                   on
                     ? "border border-gold bg-gold font-semibold text-ink"
                     : "border border-[rgba(244,239,228,.16)] text-muted hover:border-gold hover:text-cream-2"
@@ -229,7 +229,7 @@ export default function Work() {
             onClick={() => current < pageCount - 1 && goPage(current + 1)}
             aria-label="Next page"
             disabled={current >= pageCount - 1}
-            className={`border-none px-1.5 py-2 text-base leading-none transition-colors duration-300 ${
+            className={`flex h-11 w-11 flex-none items-center justify-center border-none text-base leading-none transition-colors duration-300 ${
               current < pageCount - 1
                 ? "cursor-pointer text-gold"
                 : "cursor-default text-[#4d4842]"

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Footer from "@/components/Footer";
-import ProducerBody from "@/components/ProducerBody";
-import ProducerHeader from "@/components/ProducerHeader";
+import Footer from "@/components/layout/Footer";
+import ProducerBody from "@/components/sections/ProducerBody";
+import ProducerHeader from "@/components/layout/ProducerHeader";
 
 export const metadata: Metadata = {
   title: "Be the Producer — Aproop Production",

@@ -22,7 +22,7 @@ export default function Footer() {
         </span>
         <a
           href="#top"
-          className="inline-flex items-center gap-[9px] text-[11.5px] font-medium uppercase tracking-[0.22em] text-[#141414] transition-colors duration-300 hover:text-[#a8781c]"
+          className="inline-flex min-h-11 items-center gap-[9px] py-3 text-[11.5px] font-medium uppercase tracking-[0.22em] text-[#141414] transition-colors duration-300 hover:text-[#a8781c]"
         >
           Back to top{" "}
           <span

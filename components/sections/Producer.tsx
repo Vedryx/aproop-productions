@@ -1,5 +1,5 @@
-import Eyebrow from "./Eyebrow";
-import SafeImg from "./SafeImg";
+import Eyebrow from "@/components/ui/Eyebrow";
+import SafeImg from "@/components/ui/SafeImg";
 
 const PRODUCER_HREF = "/be-the-producer";
 
@@ -44,7 +44,7 @@ export default function Producer() {
                 alt="Datan — poster"
                 className="absolute inset-0 block h-full w-full object-cover"
               />
-              <span className="absolute left-0 top-3.5 bg-ink px-[11px] py-1.5 text-[9.5px] uppercase tracking-[0.22em] text-gold">
+              <span className="absolute left-0 top-3.5 bg-ink px-[11px] py-1.5 text-[11px] uppercase tracking-[0.22em] text-gold">
                 Short film
               </span>
               <span
@@ -68,7 +68,7 @@ export default function Producer() {
                 alt="Bhimbhaskara — key art"
                 className="absolute inset-0 block h-full w-full object-cover"
               />
-              <span className="absolute left-0 top-3.5 bg-ink px-[11px] py-1.5 text-[9.5px] uppercase tracking-[0.22em] text-gold">
+              <span className="absolute left-0 top-3.5 bg-ink px-[11px] py-1.5 text-[11px] uppercase tracking-[0.22em] text-gold">
                 Song
               </span>
               <span

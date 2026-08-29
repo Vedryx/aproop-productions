@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { fmtINR, type Project } from "@/lib/producer";
-import SafeImg from "./SafeImg";
+import SafeImg from "@/components/ui/SafeImg";
 
 const META_LABEL =
-  "mb-1.5 text-[10px] uppercase tracking-[0.22em] text-muted-3";
+  "mb-1.5 text-[11px] uppercase tracking-[0.22em] text-muted-3";
 const META_VALUE = "text-sm text-muted-2";
 const PANEL_LABEL =
-  "mb-2 text-[10.5px] uppercase tracking-[0.22em] text-muted";
+  "mb-2 text-[11px] uppercase tracking-[0.22em] text-muted";
 
 export default function ProjectCard({ project: p }: { project: Project }) {
   // The design opens on the second tier (₹10,000) and seeds Custom at ₹25,000.
@@ -37,7 +37,7 @@ export default function ProjectCard({ project: p }: { project: Project }) {
             alt={p.ph}
             className="absolute inset-0 block h-full w-full object-cover"
           />
-          <span className="absolute left-0 top-[18px] border-l-2 border-gold bg-[rgba(19,18,17,.88)] px-3 py-[7px] text-[10px] uppercase tracking-[0.22em] text-gold-soft">
+          <span className="absolute left-0 top-[18px] border-l-2 border-gold bg-[rgba(19,18,17,.88)] px-3 py-[7px] text-[11px] uppercase tracking-[0.22em] text-gold-soft">
             {p.kind}
           </span>
         </div>
@@ -103,7 +103,7 @@ export default function ProjectCard({ project: p }: { project: Project }) {
         </div>
 
         <div>
-          <div className="mb-3 text-[10.5px] uppercase tracking-[0.22em] text-muted">
+          <div className="mb-3 text-[11px] uppercase tracking-[0.22em] text-muted">
             Be a part of it
           </div>
           <div className="flex flex-wrap gap-2.5">
@@ -115,7 +115,7 @@ export default function ProjectCard({ project: p }: { project: Project }) {
                   type="button"
                   onClick={() => setPick(ti)}
                   aria-pressed={on}
-                  className={`cursor-pointer border border-[rgba(217,178,60,.45)] px-[18px] py-3 text-[13px] tracking-[0.06em] tabular-nums transition-all duration-300 ${
+                  className={`min-h-11 cursor-pointer border border-[rgba(217,178,60,.45)] px-[18px] py-3 text-[13px] tracking-[0.06em] tabular-nums transition-all duration-300 ${
                     on
                       ? "-translate-y-0.5 bg-gold text-ink"
                       : "bg-transparent text-gold-soft hover:bg-[rgba(217,178,60,.12)]"
@@ -131,7 +131,7 @@ export default function ProjectCard({ project: p }: { project: Project }) {
         {customOpen && (
           <div className="flex flex-col gap-3">
             <div className="flex items-baseline justify-between gap-4">
-              <span className="text-[10.5px] uppercase tracking-[0.22em] text-muted-3">
+              <span className="text-[11px] uppercase tracking-[0.22em] text-muted-3">
                 Your amount
               </span>
               <span className="font-display text-[clamp(24px,2.2vw,34px)] leading-none text-gold tabular-nums">
@@ -153,7 +153,7 @@ export default function ProjectCard({ project: p }: { project: Project }) {
               }
               aria-label="Custom contribution amount"
             />
-            <div className="flex justify-between text-[10px] uppercase tracking-[0.16em] text-[#6f6a63]">
+            <div className="flex justify-between text-[11px] uppercase tracking-[0.16em] text-[#6f6a63]">
               <span>₹1,000</span>
               <span>₹2,00,000</span>
             </div>

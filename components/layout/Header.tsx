@@ -116,7 +116,7 @@ export default function Header() {
                 onClick={() => setMenu(false)}
                 className="flex items-baseline gap-3.5 border-b border-[rgba(20,20,20,.08)] py-[15px] font-display text-2xl text-[#141414] transition-[color,padding-left] duration-300 hover:pl-2 hover:text-[#a8781c]"
               >
-                <span className="font-body text-[10px] tracking-[0.2em] text-rust tabular-nums">
+                <span className="font-body text-[11px] tracking-[0.2em] text-rust tabular-nums">
                   {m.num}
                 </span>
                 {m.label}
