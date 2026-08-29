@@ -546,8 +546,67 @@ header[data-top="yes"] .ap-burger span {
   .ap-phase:last-of-type {
     border-bottom: none;
   }
+
+  /* Stacked, the phases lose the horizontal timeline that carries the eye
+     across on desktop, which left the dot, the icon and the button floating as
+     three unrelated things separated by large gaps. Rebuild it vertically:
+     the dot keeps a rule running off to the right, and the icon pairs up with
+     the title instead of sitting alone above it. */
   .ap-phase [data-stroke] {
     display: none !important;
+  }
+  .ap-phase-mark {
+    height: 34px !important;
+  }
+  .ap-phase-mark::after {
+    content: "";
+    position: absolute;
+    left: 26px;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    margin-top: -0.5px;
+    background: linear-gradient(
+      to right,
+      rgba(217, 178, 60, 0.55),
+      rgba(217, 178, 60, 0)
+    );
+  }
+  .ap-phase-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 18px;
+  }
+  .ap-phase-icon {
+    margin-top: 0 !important;
+    flex: none;
+  }
+  .ap-phase-title {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    min-width: 0;
+  }
+  /* The hint was absolutely placed, which collided with the icon once they
+     shared a row. Put it in flow directly above the button; the arrow already
+     points down-left, so it still aims at what it describes. */
+  .ap-phase-hint {
+    position: static !important;
+    bottom: auto !important;
+    left: auto !important;
+    align-items: flex-end !important;
+    gap: 4px !important;
+  }
+  .ap-phase-hint svg {
+    width: 20px !important;
+    height: 24px !important;
+  }
+  .ap-phase-head + div {
+    margin-top: 16px;
   }
   .bp-card > div:last-child {
     border-left: none !important;

@@ -84,7 +84,7 @@ export default function Services() {
                   </span>
                 </div>
 
-                <div className="relative flex h-[clamp(52px,6vw,84px)] items-center">
+                <div className="ap-phase-mark relative flex h-[clamp(52px,6vw,84px)] items-center">
                   {i === 0 && (
                     <span
                       data-stroke=""
@@ -101,7 +101,8 @@ export default function Services() {
                   />
                 </div>
 
-                <div className="mt-[clamp(26px,3vw,44px)] text-gold">
+                <div className="ap-phase-head">
+                <div className="ap-phase-icon mt-[clamp(26px,3vw,44px)] text-gold">
                   <svg
                     viewBox="0 0 48 48"
                     aria-hidden="true"
@@ -119,11 +120,11 @@ export default function Services() {
                   </svg>
                 </div>
 
-                <h3 className="relative mb-3.5 mt-[clamp(22px,2.6vw,36px)]">
+                <h3 className="ap-phase-title relative mb-3.5 mt-[clamp(22px,2.6vw,36px)]">
                   {i === 0 && (
                     <span
                       aria-hidden="true"
-                      className="pointer-events-none absolute left-[34%] flex items-start gap-1.5 transition-opacity duration-300"
+                      className="ap-phase-hint pointer-events-none absolute left-[34%] flex items-start gap-1.5 transition-opacity duration-300"
                       style={{
                         bottom: "calc(100% - 8px)",
                         opacity: isOpen ? 0 : 1,
@@ -158,6 +159,7 @@ export default function Services() {
                     {p.title}
                   </button>
                 </h3>
+                </div>
 
                 <div className="mb-[18px] text-[11px] uppercase tracking-[0.22em] text-rust">
                   {p.kicker}
