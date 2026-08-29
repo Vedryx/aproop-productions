@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useFocusTrap } from "./useFocusTrap";
 
 const FIELD =
   "w-full box-border bg-transparent border-0 border-b border-[rgba(244,239,228,.18)] text-cream text-[17px] pb-3.5 pt-2 transition-colors duration-300 focus:border-gold";
@@ -15,6 +16,9 @@ export default function PitchModal({
 }) {
   const [sent, setSent] = useState(false);
   const reset = useRef<number | null>(null);
+  const sheet = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(open, sheet);
 
   useEffect(() => {
     if (!open) return;
@@ -47,6 +51,7 @@ export default function PitchModal({
         className="bp-veil absolute inset-0 bg-[rgba(9,8,8,.72)] backdrop-blur-[3px] transition-opacity duration-[450ms]"
       />
       <div
+        ref={sheet}
         role="dialog"
         aria-modal="true"
         aria-label="Pitch your story"

@@ -12,6 +12,7 @@ export const metadata: Metadata = {
     description:
       "Back a story before the world sees it. Pick a film, contribute what feels right, take a producer credit.",
     type: "website",
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "Aproop Production" }],
   },
 };
 

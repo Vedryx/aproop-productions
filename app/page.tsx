@@ -20,6 +20,10 @@ export default function Home() {
       <HashScroll />
       <IntroClap />
       <Header />
+      <h1 className="sr-only">
+        Aproop Production — ad films, documentaries, short films, songs and
+        jingles
+      </h1>
       <Hero />
       <Work />
       <Brands />

@@ -109,7 +109,9 @@ export default function Work() {
               key={label}
               type="button"
               role="tab"
+              id={`work-tab-${i}`}
               aria-selected={active}
+              aria-controls="work-grid"
               onClick={() => {
                 setCat(label);
                 setPage(0);
@@ -129,7 +131,12 @@ export default function Work() {
         })}
       </div>
 
-      <div className="ap-wgrid grid auto-rows-fr grid-cols-2 items-start justify-items-stretch gap-[clamp(14px,1.7vh,24px)]">
+      <div
+        id="work-grid"
+        role="tabpanel"
+        aria-labelledby={`work-tab-${cats.indexOf(cat)}`}
+        className="ap-wgrid grid auto-rows-fr grid-cols-2 items-start justify-items-stretch gap-[clamp(14px,1.7vh,24px)]"
+      >
         {visible.map((c) => (
           <article
             key={c.key}

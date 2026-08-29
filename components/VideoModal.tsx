@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useFocusTrap } from "./useFocusTrap";
 
 export type PlayTarget = { id: string; title: string; single?: boolean } | null;
 
@@ -11,6 +12,9 @@ export default function VideoModal({
   play: PlayTarget;
   onClose: () => void;
 }) {
+  const sheet = useRef<HTMLDivElement>(null);
+  useFocusTrap(!!play, sheet);
+
   useEffect(() => {
     if (!play) return;
     const onKey = (e: KeyboardEvent) => {
@@ -34,13 +38,14 @@ export default function VideoModal({
   return (
     <div
       onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
       className="fixed inset-0 z-[80] flex items-center justify-center bg-[rgba(11,10,9,.5)] p-[clamp(16px,5vw,64px)] backdrop-blur-[3px]"
       style={{ animation: "ap-fadein .35s ease both" }}
     >
       <div
+        ref={sheet}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
         onClick={(e) => e.stopPropagation()}
         className="relative aspect-video w-[min(1080px,100%)] border border-[rgba(217,178,60,.45)] bg-black shadow-[0_50px_140px_rgba(0,0,0,.75)]"
         style={{ animation: "ap-modalin .55s cubic-bezier(.2,.7,.2,1) both" }}
