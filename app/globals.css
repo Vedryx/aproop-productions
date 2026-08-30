@@ -484,6 +484,11 @@ header[data-top="yes"] .ap-burger span {
   pointer-events: none;
 }
 
+/* Makers renders two trees as well: the desktop cutout and the 2b portraits. */
+.ap-mk-compact {
+  display: none;
+}
+
 /* Services renders two trees: the desktop three-column layout and the
    icon-tabs view. Default to desktop; the responsive layer swaps them. */
 .ap-svc-compact {
@@ -568,32 +573,12 @@ header[data-top="yes"] .ap-burger span {
     max-width: 380px;
   }
 
-  /* Makers: the absolutely-placed photo becomes a normal centred block. */
-  .ap-mkrow {
-    grid-template-columns: minmax(0, 1fr) !important;
-    min-height: 0 !important;
-    justify-items: center;
+  /* Makers swaps to the two-portrait view (option 2b) below 1024. */
+  .ap-mk-desktop {
+    display: none;
   }
-  .ap-mkimg {
-    position: static;
-    order: -1;
-    translate: none;
-    width: 100%;
-    height: auto;
-    max-width: min(560px, 100%);
-    margin: 0 auto 8px;
-  }
-  .ap-mkcol {
-    align-self: auto !important;
-    padding: 0 !important;
-    justify-self: stretch !important;
-    max-width: none !important;
-    align-items: flex-start !important;
-    text-align: left !important;
-    width: 100%;
-  }
-  .ap-mkcol > * {
-    text-align: left !important;
+  .ap-mk-compact {
+    display: flex;
   }
 }
 
@@ -959,5 +944,164 @@ input.ap-range::-moz-range-thumb {
   }
   .oc-list li {
     font-size: 14.5px;
+  }
+}
+
+/* ---------------- makers: one portrait each (option 2b) ----------------
+   Mobile and tablet only; desktop keeps the single duo cutout. Values follow
+   the canvas. The same image is windowed twice via the per-person crop set in
+   Makers.tsx; .mk-port is the window. */
+.ap-mk-compact {
+  flex-direction: column;
+  gap: 26px;
+}
+
+.mk-row {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 16px 18px;
+  align-items: end;
+  border-top: 1px solid rgba(217, 178, 60, 0.28);
+  padding-top: 22px;
+}
+
+.mk-port-wrap {
+  min-width: 0;
+}
+.mk-port {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 0.68;
+  overflow: hidden;
+  border: 1px solid rgba(217, 178, 60, 0.22);
+  background: linear-gradient(
+    180deg,
+    rgba(217, 178, 60, 0.07),
+    rgba(217, 178, 60, 0)
+  );
+}
+.mk-num {
+  display: block;
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: #d9b23c;
+  font-feature-settings: "tnum";
+}
+
+.mk-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+.mk-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 27px;
+  line-height: 1.05;
+  color: #f6f1e6;
+}
+.mk-role {
+  background: #d9b23c;
+  color: #131211;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 8px 12px;
+}
+
+.mk-body {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.mk-body p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: #a9a29a;
+  font-weight: 300;
+}
+.mk-hello {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding-bottom: 6px;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #c1563a;
+  border-bottom: 1px solid rgba(193, 86, 58, 0.6);
+  transition:
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+.mk-hello:hover {
+  color: #d9b23c;
+  border-bottom-color: #d9b23c;
+}
+
+/* Tablet: portrait beside the bio, and the second row mirrors so the two
+   portraits face each other across the spread. */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .ap-mk-compact {
+    gap: 34px;
+  }
+  .mk-row {
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: 10px 26px;
+    align-items: start;
+    padding-top: 26px;
+  }
+  .mk-port-wrap {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  .mk-head {
+    grid-column: 2;
+    grid-row: 1;
+    gap: 14px;
+  }
+  .mk-body {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .mk-name {
+    font-size: 34px;
+  }
+  .mk-role {
+    letter-spacing: 0.18em;
+    padding: 8px 14px;
+  }
+  .mk-body p {
+    margin-top: 16px;
+    font-size: 14px;
+    line-height: 1.75;
+    max-width: 52ch;
+  }
+
+  .mk-row-r {
+    grid-template-columns: minmax(0, 1fr) 210px;
+  }
+  .mk-row-r .mk-port-wrap {
+    grid-column: 2;
+  }
+  .mk-row-r .mk-head {
+    grid-column: 1;
+    align-items: flex-end;
+  }
+  .mk-row-r .mk-body {
+    grid-column: 1;
+    text-align: right;
+  }
+  .mk-row-r .mk-body p {
+    text-align: right;
+    margin-left: auto;
   }
 }

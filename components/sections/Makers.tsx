@@ -4,6 +4,71 @@ import SafeImg from "@/components/ui/SafeImg";
 const HELLO =
   "mt-2 inline-flex min-h-11 items-center gap-2.5 border-b border-[rgba(193,86,58,.6)] pb-1.5 pt-3 text-[11.5px] uppercase tracking-[0.22em] text-rust transition-colors hover:border-gold hover:text-gold";
 
+/* Option 2b: the duo cutout is windowed twice so each founder gets their own
+   tall portrait. The crop values frame one face out of the shared image. */
+const MAKERS = [
+  {
+    num: "01",
+    name: "Harish Tarun",
+    role: "Writer-Director, Founder",
+    bio: "I am drawn to the poetry of everyday life. To people, their emotions, and their untold stories. For ten years, I have been finding different ways to fit these lives into a few frames. No two stories should feel the same. So I keep experimenting. A decade of stories behind me. And many more waiting to be told.",
+    href: "https://www.instagram.com/ugavata.harish",
+    crop: { top: "-15%", left: "-102.3%", width: "418.6%" },
+  },
+  {
+    num: "02",
+    name: "Samruddhi Kuchik",
+    role: "Producer, Co-Founder",
+    bio: "As a Producer at Aproop Production, I have spent the last six years behind the scenes. From the first conversation to the final frame, I bring people, places, plans, and possibilities together. Most importantly, I try to make impossible deadlines possible and ambitious scripts to screen.",
+    href: "https://www.instagram.com/samruddhi_kuchik",
+    crop: { top: "-32.6%", left: "-183.3%", width: "375%" },
+  },
+];
+
+function MakerRow({
+  m,
+  mirror,
+}: {
+  m: (typeof MAKERS)[number];
+  mirror?: boolean;
+}) {
+  return (
+    <div className={`mk-row${mirror ? " mk-row-r" : ""}`}>
+      <div className="mk-port-wrap">
+        <div className="mk-port">
+          <SafeImg
+            src="/uploads/makers-bg.png"
+            alt={m.name}
+            style={{
+              position: "absolute",
+              top: m.crop.top,
+              left: m.crop.left,
+              width: m.crop.width,
+              height: "auto",
+              maxWidth: "none",
+            }}
+          />
+        </div>
+        <span aria-hidden="true" className="mk-num">
+          {m.num}
+        </span>
+      </div>
+
+      <div className="mk-head">
+        <h3 className="mk-name">{m.name}</h3>
+        <span className="mk-role">{m.role}</span>
+      </div>
+
+      <div className="mk-body">
+        <p>{m.bio}</p>
+        <a href={m.href} target="_blank" rel="noopener" className="mk-hello">
+          Say hello <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </div>
+  );
+}
+
 export default function Makers() {
   return (
     <section
@@ -29,6 +94,7 @@ export default function Makers() {
         </div>
       </div>
 
+      <div className="ap-mk-desktop">
       <div className="ap-mkrow relative mx-auto grid min-h-[clamp(480px,44vw,640px)] max-w-[1480px] grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)] items-center gap-[clamp(16px,2vw,34px)]">
         <SafeImg
           src="/uploads/makers-bg.png"
@@ -97,6 +163,13 @@ export default function Makers() {
             Say hello <span>↗</span>
           </a>
         </div>
+      </div>
+      </div>
+
+      {/* Option 2b — mobile and tablet. Desktop keeps the single cutout above. */}
+      <div className="ap-mk-compact">
+        <MakerRow m={MAKERS[0]} />
+        <MakerRow m={MAKERS[1]} mirror />
       </div>
     </section>
   );
