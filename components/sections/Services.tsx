@@ -4,8 +4,38 @@ import { useState } from "react";
 import { phases } from "@/lib/data";
 import Eyebrow from "@/components/ui/Eyebrow";
 
+function PhaseIcon({
+  d,
+  anim,
+  size,
+}: {
+  d: string;
+  anim: string;
+  size: number;
+}) {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      aria-hidden="true"
+      className="block"
+      style={{ width: size, height: size, animation: anim }}
+    >
+      <path
+        d={d}
+        fill="none"
+        stroke="#d9b23c"
+        strokeWidth={2}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export default function Services() {
   const [open, setOpen] = useState<Record<number, boolean>>({});
+  // Icon-tabs view (mobile + tablet): which phase the tiles have selected.
+  const [sel, setSel] = useState(0);
 
   const toggle = (i: number, el: HTMLElement) => {
     const wasOpen = !!open[i];
@@ -58,7 +88,7 @@ export default function Services() {
         </p>
       </div>
 
-      <div className="relative border-y border-[rgba(217,178,60,.28)]">
+      <div className="ap-svc-desktop relative border-y border-[rgba(217,178,60,.28)]">
         <div className="ap-sgrid relative grid grid-cols-3 overflow-hidden">
           {phases.map((p, i) => {
             const isOpen = !!open[i];
@@ -189,6 +219,78 @@ export default function Services() {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Icon tabs (option 1c) — mobile and tablet only. The three animated
+          icons become the navigation so all phases stay on screen and the
+          section stays short; the panel below shows the selected phase. */}
+      <div className="ap-svc-compact">
+        <div className="oc-wrap">
+          <div className="oc-tiles" role="tablist" aria-label="Production phases">
+            {phases.map((p, i) => (
+              <button
+                key={p.num}
+                type="button"
+                role="tab"
+                id={`oc-tab-${i}`}
+                aria-selected={sel === i}
+                aria-controls="oc-panel"
+                className="oc-tile"
+                data-on={sel === i}
+                onClick={() => setSel(i)}
+              >
+                <PhaseIcon d={p.icon} anim={p.iconAnim} size={30} />
+                <span className="oc-tile-num">{p.num}</span>
+                <span className="oc-tilelabel">{p.stage}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="min-w-0">
+            <div
+              className="oc-panel"
+              id="oc-panel"
+              role="tabpanel"
+              aria-labelledby={`oc-tab-${sel}`}
+            >
+              <div className="oc-stage">{phases[sel].stage}</div>
+
+              <button
+                type="button"
+                className="oc-cta"
+                aria-expanded={!!open[sel]}
+                onClick={() => setOpen((s) => ({ ...s, [sel]: !s[sel] }))}
+              >
+                <span className="oc-cta-label">{phases[sel].title}</span>
+                <span aria-hidden="true" className="oc-chev" data-open={!!open[sel]}>
+                  +
+                </span>
+              </button>
+
+              <div className="oc-kickerrow">
+                <span className="oc-kicker">{phases[sel].kicker}</span>
+                <span className="oc-hint" data-show={!open[sel]}>
+                  ← tap to reveal
+                </span>
+              </div>
+
+              <p className="oc-body">{phases[sel].body}</p>
+
+              <div className="oc-reveal" data-open={!!open[sel]}>
+                <div className="overflow-hidden">
+                  <ul className="oc-list">
+                    {phases[sel].items.map((it) => (
+                      <li key={it}>
+                        <span aria-hidden="true">✦</span>
+                        {it}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

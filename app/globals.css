@@ -484,6 +484,12 @@ header[data-top="yes"] .ap-burger span {
   pointer-events: none;
 }
 
+/* Services renders two trees: the desktop three-column layout and the
+   icon-tabs view. Default to desktop; the responsive layer swaps them. */
+.ap-svc-compact {
+  display: none;
+}
+
 /* ---------------- responsive ----------------
    Four tiers, used consistently everywhere:
      1024  desktop  -> tablet   (multi-column sections collapse)
@@ -533,7 +539,6 @@ header[data-top="yes"] .ap-burger span {
   }
 
   /* Every multi-column section collapses at the same point. */
-  .ap-sgrid,
   .ap-cfgrid,
   .bp-card,
   #contact,
@@ -547,73 +552,13 @@ header[data-top="yes"] .ap-burger span {
     border-bottom: none;
   }
 
-  /* Stacked, the phases lose the horizontal timeline that carries the eye
-     across on desktop, which left the dot, the icon and the button floating as
-     three unrelated things separated by large gaps. Rebuild it vertically:
-     the dot keeps a rule running off to the right, and the icon pairs up with
-     the title instead of sitting alone above it. */
-  .ap-phase [data-stroke] {
-    display: none !important;
+  /* Below 1024 the services section swaps to the icon-tabs view, so the
+     desktop phase columns are hidden rather than restacked. */
+  .ap-svc-desktop {
+    display: none;
   }
-  .ap-phase-mark {
-    height: 34px !important;
-  }
-  .ap-phase-mark::after {
-    content: "";
-    position: absolute;
-    left: 26px;
-    right: 0;
-    top: 50%;
-    height: 1px;
-    margin-top: -0.5px;
-    background: linear-gradient(
-      to right,
-      rgba(217, 178, 60, 0.55),
-      rgba(217, 178, 60, 0)
-    );
-  }
-  .ap-phase-head {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-top: 18px;
-  }
-  .ap-phase-icon {
-    margin-top: 0 !important;
-    flex: none;
-  }
-  .ap-phase-title {
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    min-width: 0;
-  }
-  /* Keep the hint out of flow. In flow it made the title block taller than the
-     button, so the icon centred against the block and sat visibly above the
-     button on phase 01 while 02 and 03 lined up. Out of flow, every phase has
-     the same row height and the icon always matches the button. It sits to the
-     right, where the arrow's existing down-left curve points back at it. */
-  .ap-phase-hint {
-    left: calc(100% + 10px) !important;
-    bottom: auto !important;
-    top: 50% !important;
-    translate: 0 -50%;
-    align-items: center !important;
-    gap: 2px !important;
-    white-space: nowrap;
-  }
-  .ap-phase-hint svg {
-    width: 18px !important;
-    height: 22px !important;
-  }
-  .ap-phase-hint span {
-    font-size: 13px !important;
-  }
-  .ap-phase-head + div {
-    margin-top: 16px;
+  .ap-svc-compact {
+    display: block;
   }
   .bp-card > div:last-child {
     border-left: none !important;
@@ -682,17 +627,6 @@ header[data-top="yes"] .ap-burger span {
     padding-left: 10px !important;
     padding-right: 10px !important;
   }
-  /* Phone widths have no room beside the button for the hint — .ap-sgrid clips
-     overflow, so it lost its tail rather than spilling. Tuck it above the
-     button's right edge, still out of flow so the icon stays aligned. */
-  .ap-phase-hint {
-    left: auto !important;
-    right: 0;
-    top: auto !important;
-    bottom: calc(100% + 4px) !important;
-    translate: none;
-  }
-
   /* Producer header: drop the section label so the logo and link fit on one line. */
   .bp-hdr-label {
     display: none !important;
@@ -787,4 +721,243 @@ input.ap-range::-moz-range-thumb {
   background: #d9b23c;
   border: 3px solid #131211;
   box-shadow: 0 0 0 1px rgba(217, 178, 60, 0.7);
+}
+
+/* ---------------- services: icon tabs (option 1c) ----------------
+   Mobile and tablet only; the desktop three-column layout is untouched.
+   Values follow the canvas. The tiles sit in a row of three on phones and
+   become a left rail once there is room, at the existing 640 tier. */
+.oc-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+}
+
+.oc-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.oc-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 12px 10px;
+  box-sizing: border-box;
+  background: transparent;
+  border: 1px solid rgba(217, 178, 60, 0.26);
+  border-radius: 10px;
+  color: #7c766e;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+.oc-tile[data-on="true"] {
+  background: rgba(217, 178, 60, 0.14);
+  border-color: #d9b23c;
+  color: #e8c469;
+}
+.oc-tile-num {
+  font-size: 11.5px;
+  letter-spacing: 0.18em;
+  font-feature-settings: "tnum";
+  color: inherit;
+}
+.oc-tilelabel {
+  display: none;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-align: left;
+  line-height: 1.35;
+}
+
+.oc-panel {
+  border-top: 1px solid rgba(217, 178, 60, 0.28);
+  padding-top: 20px;
+}
+.oc-stage {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #7c766e;
+  margin-bottom: 14px;
+}
+
+.oc-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 23px;
+  line-height: 1.1;
+  color: #1a1408;
+  background: #e0b040;
+  border: none;
+  border-radius: 9px;
+  padding: 14px 16px;
+  min-height: 52px;
+  box-sizing: border-box;
+  cursor: pointer;
+  box-shadow: 0 6px 0 0 #a8781c;
+  transition:
+    transform 0.09s cubic-bezier(0.3, 0.7, 0.3, 1),
+    box-shadow 0.09s cubic-bezier(0.3, 0.7, 0.3, 1),
+    background 0.2s ease;
+}
+.oc-cta:hover {
+  background: #e8bd55;
+}
+.oc-cta:active {
+  transform: translateY(6px);
+  box-shadow: 0 0 0 0 #a8781c;
+  background: #d9a93c;
+}
+.oc-cta-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.oc-chev {
+  flex: none;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1;
+  color: #5a3f0d;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.oc-chev[data-open="true"] {
+  transform: rotate(135deg);
+}
+
+.oc-kickerrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.oc-kicker {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c1563a;
+}
+.oc-hint {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13.5px;
+  color: #e2c66d;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.oc-hint[data-show="true"] {
+  opacity: 1;
+}
+
+.oc-body {
+  margin: 14px 0 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #a9a29a;
+  font-weight: 300;
+}
+
+.oc-reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.oc-reveal[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+.oc-list {
+  margin: 16px 0 0;
+  padding: 16px 0 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid rgba(217, 178, 60, 0.18);
+}
+.oc-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #c9c2b8;
+  font-weight: 300;
+}
+.oc-list li span {
+  flex: none;
+  color: #d9b23c;
+  font-size: 11px;
+}
+
+/* Tablet: the tiles become a labelled left rail beside the panel. */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .oc-wrap {
+    grid-template-columns: 188px minmax(0, 1fr);
+    gap: 26px;
+    align-items: start;
+  }
+  .oc-tiles {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .oc-tile {
+    justify-content: flex-start;
+  }
+  .oc-tilelabel {
+    display: block;
+  }
+  .oc-panel {
+    padding-top: 22px;
+  }
+  .oc-stage {
+    margin-bottom: 16px;
+  }
+  .oc-cta {
+    max-width: 400px;
+    font-size: 26px;
+    min-height: 56px;
+    padding: 14px 18px;
+    gap: 14px;
+  }
+  .oc-kickerrow {
+    gap: 12px;
+  }
+  .oc-hint {
+    font-size: 14px;
+  }
+  .oc-body {
+    margin-top: 16px;
+    font-size: 15px;
+    line-height: 1.75;
+    max-width: 52ch;
+  }
+  .oc-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 20px;
+    margin-top: 18px;
+    padding-top: 18px;
+  }
+  .oc-list li {
+    font-size: 14.5px;
+  }
 }
