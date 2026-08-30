@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Eyebrow from "@/components/ui/Eyebrow";
+import Honeypot from "@/components/ui/Honeypot";
+import { useEnquiry } from "@/hooks/useEnquiry";
 
 const FIELD =
   "w-full box-border bg-transparent border-0 border-b border-[rgba(244,239,228,.18)] text-cream text-[17px] pb-3.5 pt-2 transition-colors duration-300 focus:border-gold";
@@ -11,7 +12,8 @@ const SOCIAL =
   "inline-flex min-h-11 items-center gap-2.5 py-3 text-[11.5px] uppercase tracking-[0.22em] text-muted-2 transition-colors duration-300 hover:text-gold";
 
 export default function Contact() {
-  const [sent, setSent] = useState(false);
+  const { status, error, submit } = useEnquiry("contact");
+  const sent = status === "sent";
 
   return (
     <section
@@ -132,10 +134,11 @@ export default function Contact() {
           data-reveal=""
           onSubmit={(e) => {
             e.preventDefault();
-            setSent(true);
+            void submit(e.currentTarget);
           }}
           className="relative flex flex-col gap-[clamp(22px,2.4vw,32px)] border border-[rgba(217,178,60,.3)] bg-panel p-[clamp(26px,3vw,44px)]"
         >
+          <Honeypot />
           <label className="block">
             <span className={LABEL}>Name</span>
             <input type="text" name="name" placeholder="Your name" className={FIELD} />
@@ -170,9 +173,14 @@ export default function Contact() {
           </label>
           <button
             type="submit"
-            className="flex cursor-pointer items-center justify-center gap-4 border-none bg-gold p-[22px] text-[12.5px] font-semibold uppercase tracking-[0.22em] text-ink transition-all duration-300 hover:-translate-y-[3px] hover:bg-gold-light hover:shadow-[0_18px_36px_rgba(217,178,60,.3)]"
+            disabled={status === "sending"}
+            className="flex cursor-pointer items-center justify-center gap-4 border-none bg-gold p-[22px] text-[12.5px] font-semibold uppercase tracking-[0.22em] text-ink transition-all duration-300 hover:-translate-y-[3px] hover:bg-gold-light hover:shadow-[0_18px_36px_rgba(217,178,60,.3)] disabled:cursor-wait disabled:opacity-70"
           >
-            {sent ? "Thanks — we'll be in touch" : "Get your free draft"}
+            {status === "sending"
+              ? "Sending…"
+              : sent
+                ? "Thanks — we'll be in touch"
+                : "Get your free draft"}
             <svg
               viewBox="0 0 24 24"
               className="h-[17px] w-[17px]"
@@ -183,6 +191,11 @@ export default function Contact() {
               <path d="M22 2 L11 13 M22 2 L15 22 L11 13 L2 9 Z" />
             </svg>
           </button>
+          {status === "error" && (
+            <p role="alert" className="m-0 text-[13px] leading-[1.6] text-rust">
+              {error}
+            </p>
+          )}
         </form>
       </div>
     </section>

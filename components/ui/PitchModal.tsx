@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useEnquiry } from "@/hooks/useEnquiry";
+import Honeypot from "@/components/ui/Honeypot";
 
 const FIELD =
   "w-full box-border bg-transparent border-0 border-b border-[rgba(244,239,228,.18)] text-cream text-[17px] pb-3.5 pt-2 transition-colors duration-300 focus:border-gold";
@@ -14,7 +16,8 @@ export default function PitchModal({
   open: boolean;
   onClose: () => void;
 }) {
-  const [sent, setSent] = useState(false);
+  const { status, error, submit, reset: resetStatus } = useEnquiry("pitch");
+  const sent = status === "sent";
   const reset = useRef<number | null>(null);
   const sheet = useRef<HTMLDivElement>(null);
 
@@ -78,15 +81,20 @@ export default function PitchModal({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            setSent(true);
-            if (reset.current) window.clearTimeout(reset.current);
-            reset.current = window.setTimeout(() => {
-              onClose();
-              setSent(false);
-            }, 1600);
+            // Only dismiss once it actually sent; a failure has to stay on
+            // screen or the message is lost with no way to tell.
+            void submit(e.currentTarget).then((ok) => {
+              if (!ok) return;
+              if (reset.current) window.clearTimeout(reset.current);
+              reset.current = window.setTimeout(() => {
+                onClose();
+                resetStatus();
+              }, 1600);
+            });
           }}
           className="flex flex-col gap-[22px]"
         >
+          <Honeypot />
           <label className="block">
             <span className={LABEL}>Name</span>
             <input type="text" name="name" placeholder="Your name" className={FIELD} />
@@ -121,9 +129,14 @@ export default function PitchModal({
           </label>
           <button
             type="submit"
-            className="flex cursor-pointer items-center justify-center gap-4 border-none bg-gold p-5 text-[12.5px] font-semibold uppercase tracking-[0.22em] text-ink transition-all duration-300 hover:-translate-y-[3px] hover:bg-gold-light"
+            disabled={status === "sending"}
+            className="flex cursor-pointer items-center justify-center gap-4 border-none bg-gold p-5 text-[12.5px] font-semibold uppercase tracking-[0.22em] text-ink transition-all duration-300 hover:-translate-y-[3px] hover:bg-gold-light disabled:cursor-wait disabled:opacity-70"
           >
-            {sent ? "Sent — we'll write back" : "Get your first draft"}
+            {status === "sending"
+              ? "Sending…"
+              : sent
+                ? "Sent — we'll write back"
+                : "Get your first draft"}
             <svg
               viewBox="0 0 24 24"
               className="h-[17px] w-[17px]"
@@ -134,6 +147,11 @@ export default function PitchModal({
               <path d="M22 2 L11 13 M22 2 L15 22 L11 13 L2 9 Z" />
             </svg>
           </button>
+          {status === "error" && (
+            <p role="alert" className="m-0 text-[13px] leading-[1.6] text-rust">
+              {error}
+            </p>
+          )}
         </form>
       </div>
     </div>
