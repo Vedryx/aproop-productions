@@ -591,19 +591,26 @@ header[data-top="yes"] .ap-burger span {
     gap: 8px;
     min-width: 0;
   }
-  /* The hint was absolutely placed, which collided with the icon once they
-     shared a row. Put it in flow directly above the button; the arrow already
-     points down-left, so it still aims at what it describes. */
+  /* Keep the hint out of flow. In flow it made the title block taller than the
+     button, so the icon centred against the block and sat visibly above the
+     button on phase 01 while 02 and 03 lined up. Out of flow, every phase has
+     the same row height and the icon always matches the button. It sits to the
+     right, where the arrow's existing down-left curve points back at it. */
   .ap-phase-hint {
-    position: static !important;
+    left: calc(100% + 10px) !important;
     bottom: auto !important;
-    left: auto !important;
-    align-items: flex-end !important;
-    gap: 4px !important;
+    top: 50% !important;
+    translate: 0 -50%;
+    align-items: center !important;
+    gap: 2px !important;
+    white-space: nowrap;
   }
   .ap-phase-hint svg {
-    width: 20px !important;
-    height: 24px !important;
+    width: 18px !important;
+    height: 22px !important;
+  }
+  .ap-phase-hint span {
+    font-size: 13px !important;
   }
   .ap-phase-head + div {
     margin-top: 16px;
@@ -675,6 +682,17 @@ header[data-top="yes"] .ap-burger span {
     padding-left: 10px !important;
     padding-right: 10px !important;
   }
+  /* Phone widths have no room beside the button for the hint — .ap-sgrid clips
+     overflow, so it lost its tail rather than spilling. Tuck it above the
+     button's right edge, still out of flow so the icon stays aligned. */
+  .ap-phase-hint {
+    left: auto !important;
+    right: 0;
+    top: auto !important;
+    bottom: calc(100% + 4px) !important;
+    translate: none;
+  }
+
   /* Producer header: drop the section label so the logo and link fit on one line. */
   .bp-hdr-label {
     display: none !important;
