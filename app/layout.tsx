@@ -49,7 +49,13 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${playfair.variable} ${jost.variable}`}>
+    <html
+      lang="en"
+      className={`${playfair.variable} ${jost.variable}`}
+      // INTRO_FLAG stamps data-intro-seen on <html> before React hydrates, so
+      // the client tree intentionally differs from the server tree here.
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: INTRO_FLAG }} />
       </head>
