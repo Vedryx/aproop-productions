@@ -484,6 +484,34 @@ header[data-top="yes"] .ap-burger span {
   pointer-events: none;
 }
 
+/* ---------------- footer ----------------
+   Desktop keeps the single row: logo, tagline, then copyright and back-to-top
+   pushed right. The two groups exist so small screens can pair the tagline with
+   the logo instead of stacking every item. */
+.ap-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(18px, 3vw, 40px);
+}
+.ap-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 3vw, 40px);
+  min-width: 0;
+}
+.ap-footer-logo {
+  width: 82px;
+  height: 82px;
+  box-sizing: border-box;
+}
+.ap-footer-meta {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 3vw, 40px);
+  margin-left: auto;
+}
+
 /* Makers renders two trees as well: the desktop cutout and the 2b portraits. */
 .ap-mk-compact {
   display: none;
@@ -573,6 +601,26 @@ header[data-top="yes"] .ap-burger span {
     max-width: 380px;
   }
 
+  /* Footer: tagline beside the logo rather than under it — stacking every
+     item made the footer roughly twice as tall as it needed to be. */
+  .ap-footer {
+    gap: 18px;
+  }
+  .ap-footer-brand {
+    flex: 1 1 100%;
+    gap: 16px;
+  }
+  .ap-footer-logo {
+    width: 64px;
+    height: 64px;
+  }
+  .ap-footer-meta {
+    flex: 1 1 100%;
+    margin-left: 0;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
   /* Makers swaps to the two-portrait view (option 2b) below 1024. */
   .ap-mk-desktop {
     display: none;
@@ -612,6 +660,10 @@ header[data-top="yes"] .ap-burger span {
     padding-left: 10px !important;
     padding-right: 10px !important;
   }
+  .ap-footer-tag {
+    letter-spacing: 0.16em;
+  }
+
   /* Producer header: drop the section label so the logo and link fit on one line. */
   .bp-hdr-label {
     display: none !important;
