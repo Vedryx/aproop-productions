@@ -511,6 +511,21 @@ header[data-top="yes"] .ap-burger span {
   gap: clamp(18px, 3vw, 40px);
   margin-left: auto;
 }
+.ap-footer-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.ap-footer-addr {
+  font-style: normal;
+  font-size: 11px;
+  line-height: 1.65;
+  letter-spacing: 0.06em;
+  color: rgba(20, 20, 20, 0.55);
+  max-width: 60ch;
+  min-width: 0;
+}
 
 /* Makers renders two trees as well: the desktop cutout and the 2b portraits. */
 .ap-mk-compact {
@@ -613,6 +628,10 @@ header[data-top="yes"] .ap-burger span {
   .ap-footer-logo {
     width: 64px;
     height: 64px;
+  }
+  .ap-footer-addr {
+    flex: 1 1 100%;
+    max-width: none;
   }
   .ap-footer-meta {
     flex: 1 1 100%;

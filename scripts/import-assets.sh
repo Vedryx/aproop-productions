@@ -104,7 +104,7 @@ else
 fi
 
 # ---- About cutout (keeps alpha) -------------------------------------------
-if src="$(find_source 'founders-cutout.png' '*founders*.png')"; then
+if src="$(find_source 'founders-cutout.png' 'about_us.png' '*founders*.png')"; then
   if [ "$have_ffmpeg" -eq 1 ]; then
     ffmpeg -y -v error -i "$src" -vf "scale=920:-2" "$DEST/founders-cutout.png"
   else

@@ -16,9 +16,16 @@ export default function Footer() {
               style={{ clipPath: "inset(0 11% 0 11%)", margin: "0 -10px" }}
             />
           </div>
-          <span className="ap-footer-tag text-[11.5px] font-medium uppercase tracking-[0.24em] text-[#141414]">
-            Ad Films · Documentaries · Short Films · Songs &amp; Jingles
-          </span>
+          <div className="ap-footer-copy">
+            <span className="ap-footer-tag text-[11.5px] font-medium uppercase tracking-[0.24em] text-[#141414]">
+              Ad Films · Documentaries · Short Films · Songs &amp; Jingles
+            </span>
+            <address className="ap-footer-addr">
+              Flat 36, Fourth Floor, Building 2, Gopinath Nagar Cooperative
+              Society, Chaitanya Nagar, Near Gandhi Bhavan, Kothrud, Pune
+              (Maharashtra, India) — 411038
+            </address>
+          </div>
         </div>
 
         <div className="ap-footer-meta">

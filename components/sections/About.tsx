@@ -1,17 +1,9 @@
 import Eyebrow from "@/components/ui/Eyebrow";
 import SafeImg from "@/components/ui/SafeImg";
 
-/**
- * Placeholder: the design calls for `/uploads/founders-cutout.png`, which has
- * not been supplied yet. This is the Makers duo photo cropped to its subjects
- * (the source is a 16:9 frame with wide transparent margins, which left the
- * figures looking small in this column). Regenerate with:
- *
- *   python3 -c "from PIL import Image; i=Image.open('public/uploads/makers-bg.png').convert('RGBA'); i.crop(i.getbbox()).save('public/uploads/about-portrait.png')"
- *
- * Point this back at the cutout once it lands — `npm run assets` picks it up.
- */
-const PORTRAIT = "/uploads/about-portrait.png";
+/* The founders cutout for this section. Rendered at up to 460px, so the file
+   is encoded at 920px (2x) with its transparency intact. */
+const PORTRAIT = "/uploads/founders-cutout.png";
 
 export default function About() {
   return (

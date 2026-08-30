@@ -59,12 +59,9 @@ npm run assets -- ~/some/folder   # or point it at a folder / .zip
 | `makers-bg.png` | `duo_photo.png` | 1778px wide, alpha kept — 4.9 MB → 576 KB |
 | `datan-poster.jpg` | `Datan Short Film.png` | 1600px wide jpg — 17 MB → 228 KB |
 | `bhimbhaskara-keyart.jpg` | `Bhimbhaskara Song.png` | 1600px wide jpg — 39 MB → 320 KB |
-| `founders-cutout.png` | `founders-cutout.png` | 920px wide, alpha kept — **still missing** |
+| `founders-cutout.png` | `about_us.png` | 920px wide, palette PNG with alpha — 5.5 MB → 139 KB |
 
-`founders-cutout.png` is the cutout in the About section and has not been
-supplied. The Makers duo photo, cropped to its subjects, stands in for it as
-`about-portrait.png` — see the note at the top of `components/About.tsx` for how
-it is generated and how to switch back once the real cutout lands.
+All five are now supplied, so the site has no missing assets.
 
 Everything else (20 client logos, both logo marks) imported fine and lives in
 `public/logos/` and `public/uploads/`.
