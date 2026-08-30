@@ -683,6 +683,14 @@ header[data-top="yes"] .ap-burger span {
     letter-spacing: 0.16em;
   }
 
+  /* The contact address is a long single token that cannot wrap, so on the
+     narrowest phones it runs past the right edge. Scale it down with the
+     viewport; at 480px this resolves to the same 22px the utility sets, so
+     the breakpoint boundary is seamless and nothing above it changes. */
+  .ap-mail {
+    font-size: clamp(17px, 5.2vw, 22px) !important;
+  }
+
   /* Producer header: drop the section label so the logo and link fit on one line. */
   .bp-hdr-label {
     display: none !important;

@@ -24,7 +24,7 @@ export default function ProjectCard({ project: p }: { project: Project }) {
   const body = `Hi Aproop team,\n\nI'd like to contribute ${fmtINR(
     amount,
   )} to “${p.title}”. Please share the payment details and next steps.\n\nName:\nPhone:`;
-  const payHref = `mailto:hello@aproopproductions.com?subject=${encodeURIComponent(
+  const payHref = `mailto:aproop.production22@gmail.com?subject=${encodeURIComponent(
     subject,
   )}&body=${encodeURIComponent(body)}`;
 
