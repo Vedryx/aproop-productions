@@ -491,7 +491,7 @@ header[data-top="yes"] .ap-burger span {
 .ap-footer {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   gap: clamp(18px, 3vw, 40px);
 }
 .ap-footer-brand {
@@ -507,9 +507,54 @@ header[data-top="yes"] .ap-burger span {
 }
 .ap-footer-meta {
   display: flex;
-  align-items: center;
-  gap: clamp(18px, 3vw, 40px);
+  flex-direction: column-reverse;
+  align-items: flex-end;
+  /* The back-to-top control carries its own 12px of tap padding, so a small
+     gap here reads as a normal line break rather than a second block. */
+  gap: 2px;
   margin-left: auto;
+}
+/* The build credit sits beside the copyright: present, but pitched a step
+   below every other line in the footer so it never competes for attention.
+   Hover and focus lift it to the same weight as the rest of the meta row. */
+.ap-footer-legal {
+  display: flex;
+  align-items: baseline;
+  gap: 6px clamp(12px, 2vw, 20px);
+  min-width: 0;
+}
+/* The copyright sits under the address on tablet and desktop, and moves into
+   the meta row beside the credit on phones. Two spans, one visible at a time —
+   the same desktop/compact split the makers and services sections use. */
+.ap-copy-compact {
+  display: none;
+}
+.ap-copy-wide {
+  margin-top: 2px;
+}
+.ap-footer-credit {
+  font-size: 10px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  letter-spacing: 0.18em;
+  color: rgba(20, 20, 20, 0.26);
+  transition: color 0.3s ease;
+}
+.ap-footer-credit a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition:
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+.ap-footer-credit:hover {
+  color: rgba(20, 20, 20, 0.5);
+}
+.ap-footer-credit a:hover,
+.ap-footer-credit a:focus-visible {
+  color: #a8781c;
+  border-bottom-color: rgba(168, 120, 28, 0.45);
 }
 .ap-footer-copy {
   display: flex;
@@ -636,8 +681,8 @@ header[data-top="yes"] .ap-burger span {
   .ap-footer-meta {
     flex: 1 1 100%;
     margin-left: 0;
-    justify-content: space-between;
-    gap: 12px;
+    justify-content: flex-start;
+    gap: 8px;
   }
 
   /* Makers swaps to the two-portrait view (option 2b) below 1024. */
@@ -656,6 +701,26 @@ header[data-top="yes"] .ap-burger span {
 }
 
 @media (max-width: 640px) {
+  /* Below 640 the copyright rejoins the meta row and stacks above the credit,
+     which keeps the left column to the tagline and the address alone. */
+  .ap-copy-wide {
+    display: none;
+  }
+  .ap-copy-compact {
+    display: inline;
+  }
+  .ap-footer-legal {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  .ap-footer-meta {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
   .ap-wgrid {
     grid-template-columns: minmax(0, 1fr) !important;
   }
