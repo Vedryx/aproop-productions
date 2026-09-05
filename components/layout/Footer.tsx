@@ -25,13 +25,28 @@ export default function Footer() {
               Society, Chaitanya Nagar, Near Gandhi Bhavan, Kothrud, Pune
               (Maharashtra, India) — 411038
             </address>
+            <span className="ap-copy-wide text-[11.5px] uppercase tracking-[0.2em] text-[rgba(20,20,20,.55)]">
+              © 2025 Aproop Production
+            </span>
           </div>
         </div>
 
         <div className="ap-footer-meta">
-          <span className="text-[11.5px] uppercase tracking-[0.2em] text-[rgba(20,20,20,.55)]">
-            © 2025 Aproop Production
-          </span>
+          <div className="ap-footer-legal">
+            <span className="ap-copy-compact text-[11.5px] uppercase tracking-[0.2em] text-[rgba(20,20,20,.55)]">
+              © 2025 Aproop Production
+            </span>
+            <span className="ap-footer-credit">
+              Developed by{" "}
+              <a
+                href="https://vedryxtech.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                VedryxTech
+              </a>
+            </span>
+          </div>
           <BackToTop className="inline-flex min-h-11 items-center gap-[9px] py-3 text-[11.5px] font-medium uppercase tracking-[0.22em] text-[#141414] transition-colors duration-300 hover:text-[#a8781c]" />
         </div>
       </div>
