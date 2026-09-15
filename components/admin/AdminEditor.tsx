@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { AdminFilm, AdminProject, Content } from "@/lib/admin/schema";
+import StarButton from "./StarButton";
 import StoryEditor, { storyStepFor } from "./StoryEditor";
 import { contentSchema, youtubeId } from "@/lib/admin/schema";
 
@@ -53,15 +54,75 @@ export default function AdminEditor({
   const router = useRouter();
   const [content, setContent] = useState(initial);
   const [saved, setSaved] = useState(JSON.stringify(initial));
-  const [tab, setTab] = useState<"work" | "stories" | "homepage">("work");
+  const [tab, setTab] = useState<"work" | "stories">("work");
   const [selection, setSelection] = useState<Selection>(null);
   const [storyStep, setStoryStep] = useState(0);
   const [storyErrors, setStoryErrors] = useState<Record<string, string>>({});
+  const [statusFilter, setStatusFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const dirty = JSON.stringify(content) !== saved;
+  const savedContent: Content = JSON.parse(saved);
+  const matchesStatus = (item: { published: boolean; homepageSlot?: number }) =>
+    statusFilter === "all" ||
+    (statusFilter === "published" && item.published) ||
+    (statusFilter === "draft" && !item.published) ||
+    (statusFilter === "starred" && !!item.homepageSlot);
+  const visibleProjects = content.projects.filter(
+    (p) =>
+      `${p.title} ${p.kind} ${p.director}`
+        .toLowerCase()
+        .includes(query.toLowerCase()) && matchesStatus(p),
+  );
+  async function toggleStar(id: string) {
+    const target = content.projects.find((p) => p.id === id);
+    if (!target || busy) return;
+    const featured = !target.homepageSlot;
+    if (
+      featured &&
+      content.projects.filter((p) => p.homepageSlot).length >= 2
+    ) {
+      setError("Only two stories can be starred. Unstar another story first.");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      const response = await fetch("/api/admin/content", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, featured, revision: content.revision }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      const persisted: Content = data;
+      const slot = persisted.projects.find((p) => p.id === id)!.homepageSlot;
+      // A star saves just the homepage flag, preserving any unfinished form edits.
+      setContent((previous) => ({
+        ...previous,
+        revision: persisted.revision,
+        projects: previous.projects.map((p) =>
+          p.id === id ? { ...p, homepageSlot: slot } : p,
+        ),
+      }));
+      setSaved(JSON.stringify(persisted));
+      setNotice(
+        featured
+          ? `“${target.title}” is now on the homepage.`
+          : `“${target.title}” was removed from the homepage.`,
+      );
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Unable to update the star.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
       if (dirty) {
@@ -104,6 +165,11 @@ export default function AdminEditor({
     update((draft) => {
       const p = draft.projects.find((p) => p.id === project?.id);
       if (p) {
+        if (
+          patch.title !== undefined &&
+          (!p.ph || p.ph === `${p.title} — poster`)
+        )
+          p.ph = `${patch.title} — poster`;
         Object.assign(p, patch);
         if (!p.published) p.homepageSlot = 0;
       }
@@ -149,8 +215,8 @@ export default function AdminEditor({
         id,
         title: "Untitled story",
         kind: "Short film",
-        ph: "Story poster",
-        poster: "/uploads/datan-poster.jpg",
+        ph: "",
+        poster: "",
         synopsis: "",
         director: "",
         stage: "Development",
@@ -253,7 +319,10 @@ export default function AdminEditor({
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
-      editProject({ poster: data.url });
+      editProject({
+        poster: data.url,
+        ph: project.ph || `${project.title} — poster`,
+      });
       setNotice("Poster uploaded. Save changes to publish it.");
     } catch (error) {
       setError(error instanceof Error ? error.message : "Upload failed.");
@@ -273,16 +342,17 @@ export default function AdminEditor({
             [
               ["work", "01", "Final outputs"],
               ["stories", "05", "Be the producer"],
-              ["homepage", "✲", "Homepage stories"],
             ] as const
           ).map(([key, number, label]) => (
             <button
               key={key}
+              disabled={busy}
               aria-current={tab === key ? "page" : undefined}
               onClick={() => {
                 setTab(key);
                 setSelection(null);
                 setQuery("");
+                setStatusFilter("all");
               }}
             >
               <span>{number}</span>
@@ -357,19 +427,13 @@ export default function AdminEditor({
         <div className={`admin-content ${project ? "admin-story-active" : ""}`}>
           <p className="admin-kicker">YOUR STUDIO, ON SCREEN</p>
           <h1>
-            {tab === "work"
-              ? "Final outputs"
-              : tab === "stories"
-                ? "Be the producer"
-                : "The homepage pair"}
+            {tab === "work" ? "Final outputs" : "Be the producer"}
             <span>.</span>
           </h1>
           <p className="admin-description">
             {tab === "work"
               ? "Keep your portfolio current. Add films, organise categories and choose what goes live."
-              : tab === "stories"
-                ? "Give your next stories a home. Manage posters, project details and contribution options."
-                : "Choose the two stories visitors see in the homepage’s Be the Producer section."}
+              : "Manage your stories. Star up to two published stories to put them on the homepage."}
           </p>
           {error && (
             <div role="alert" className="admin-error">
@@ -382,79 +446,7 @@ export default function AdminEditor({
             </div>
           )}
           <fieldset disabled={busy} className="admin-fieldset">
-            {tab === "homepage" ? (
-              <>
-                <div className="admin-home-grid">
-                  {([1, 2] as const).map((slot) => {
-                    const featured = content.projects.find(
-                      (p) => p.homepageSlot === slot,
-                    );
-                    return (
-                      <section className="admin-panel" key={slot}>
-                        <p className="admin-kicker">HOMEPAGE / STORY 0{slot}</p>
-                        <div className="admin-feature-preview">
-                          {featured ? (
-                            <Image
-                              unoptimized
-                              width={800}
-                              height={500}
-                              src={featured.poster}
-                              alt={featured.ph}
-                            />
-                          ) : (
-                            <span>Select a story</span>
-                          )}
-                        </div>
-                        <label>
-                          Featured story {slot}
-                          <select
-                            value={featured?.id || ""}
-                            onChange={(e) =>
-                              update((d) => {
-                                d.projects.forEach((p) => {
-                                  if (p.homepageSlot === slot)
-                                    p.homepageSlot = 0;
-                                });
-                                const p = d.projects.find(
-                                  (p) => p.id === e.target.value,
-                                );
-                                if (p) p.homepageSlot = slot;
-                              })
-                            }
-                          >
-                            <option value="">No story selected</option>
-                            {content.projects
-                              .filter((p) => p.published)
-                              .map((p) => (
-                                <option
-                                  value={p.id}
-                                  key={p.id}
-                                  disabled={
-                                    p.homepageSlot !== 0 &&
-                                    p.homepageSlot !== slot
-                                  }
-                                >
-                                  {p.title}
-                                </option>
-                              ))}
-                          </select>
-                        </label>
-                        <p className="admin-help">
-                          {slot === 1
-                            ? "The larger poster at the back."
-                            : "The smaller poster at the front."}{" "}
-                          Only published stories can be selected.
-                        </p>
-                      </section>
-                    );
-                  })}
-                </div>
-                <p className="admin-help">
-                  Select one story for each slot to show two posters.
-                  Unpublishing or removing a story clears its slot.
-                </p>
-              </>
-            ) : project ? (
+            {project ? (
               <StoryEditor
                 key={project.id}
                 project={project}
@@ -470,6 +462,16 @@ export default function AdminEditor({
                 onClose={() => setSelection(null)}
                 onRemove={remove}
                 onMove={move}
+                directorChoices={content.projects.map((p) => p.director)}
+                formatChoices={content.projects.map((p) => p.kind)}
+                stageChoices={content.projects.map((p) => p.stage)}
+                onStar={() => void toggleStar(project.id)}
+                starDisabled={
+                  !project.published ||
+                  !savedContent.projects.some(
+                    (p) => p.id === project.id && p.published,
+                  )
+                }
               />
             ) : (
               <>
@@ -486,6 +488,23 @@ export default function AdminEditor({
                       onChange={(e) => setQuery(e.target.value)}
                     />
                   </label>
+                  <label className="admin-filter">
+                    <span className="sr-only">Filter content</span>
+                    <select
+                      aria-label="Filter content"
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                      <option value="all">
+                        All {tab === "work" ? "films" : "stories"}
+                      </option>
+                      <option value="published">Published</option>
+                      <option value="draft">Drafts</option>
+                      {tab === "stories" && (
+                        <option value="starred">Starred</option>
+                      )}
+                    </select>
+                  </label>
                   <span className="admin-count">
                     {tab === "work"
                       ? `${films.length} films`
@@ -498,6 +517,21 @@ export default function AdminEditor({
                     + Add {tab === "work" ? "film" : "story"}
                   </button>
                 </div>
+                {tab === "stories" && (
+                  <div className="admin-star-summary">
+                    <span>
+                      <strong>
+                        {content.projects.filter((p) => p.homepageSlot).length}
+                        /2
+                      </strong>{" "}
+                      on homepage
+                    </span>
+                    <p>
+                      Stars save immediately. Publish a draft before starring
+                      it.
+                    </p>
+                  </div>
+                )}
                 <div
                   className={`admin-edit-grid ${selection ? "has-selection" : ""}`}
                 >
@@ -551,10 +585,12 @@ export default function AdminEditor({
                               </button>
                             </div>
                             {s.films
-                              .filter((f) =>
-                                `${f.title} ${s.key}`
-                                  .toLowerCase()
-                                  .includes(query.toLowerCase()),
+                              .filter(
+                                (f) =>
+                                  `${f.title} ${s.key}`
+                                    .toLowerCase()
+                                    .includes(query.toLowerCase()) &&
+                                  matchesStatus(f),
                               )
                               .map((f) => (
                                 <button
@@ -598,32 +634,33 @@ export default function AdminEditor({
                             )}
                           </section>
                         ))
-                      : content.projects
-                          .filter((p) =>
-                            p.title.toLowerCase().includes(query.toLowerCase()),
-                          )
-                          .map((p) => (
+                      : visibleProjects.map((p) => (
+                          <article className="admin-story-row" key={p.id}>
                             <button
-                              className={`admin-row ${selection?.id === p.id ? "selected" : ""}`}
-                              key={p.id}
+                              className="admin-row"
                               onClick={() => openProject(p.id)}
+                              aria-label={`Edit ${p.title}`}
                             >
                               <div className="admin-thumb">
-                                <Image
-                                  unoptimized
-                                  width={800}
-                                  height={500}
-                                  src={p.poster}
-                                  alt=""
-                                />
+                                {p.poster ? (
+                                  <Image
+                                    unoptimized
+                                    width={800}
+                                    height={500}
+                                    src={p.poster}
+                                    alt=""
+                                  />
+                                ) : (
+                                  <span className="admin-poster-placeholder">
+                                    No poster
+                                  </span>
+                                )}
                               </div>
                               <div className="admin-row-copy">
                                 <strong>{p.title}</strong>
                                 <small>
-                                  {p.kind}
-                                  {p.homepageSlot
-                                    ? ` · Homepage ${p.homepageSlot}`
-                                    : ""}
+                                  {p.kind || "Choose a format"}
+                                  {p.homepageSlot ? " · On homepage" : ""}
                                 </small>
                               </div>
                               <span
@@ -633,7 +670,45 @@ export default function AdminEditor({
                               </span>
                               <span>↗</span>
                             </button>
-                          ))}
+                            <StarButton
+                              title={p.title}
+                              starred={!!p.homepageSlot}
+                              disabled={
+                                busy ||
+                                !p.published ||
+                                !savedContent.projects.some(
+                                  (saved) =>
+                                    saved.id === p.id && saved.published,
+                                )
+                              }
+                              reason={
+                                !p.published ||
+                                !savedContent.projects.some(
+                                  (saved) =>
+                                    saved.id === p.id && saved.published,
+                                )
+                                  ? "Save and publish this story before starring it."
+                                  : undefined
+                              }
+                              onClick={() => void toggleStar(p.id)}
+                            />
+                          </article>
+                        ))}
+                    {tab === "stories" &&
+                      !visibleProjects.length &&
+                      content.projects.length > 0 && (
+                        <div className="admin-empty">
+                          No stories match this filter.{" "}
+                          <button
+                            onClick={() => {
+                              setQuery("");
+                              setStatusFilter("all");
+                            }}
+                          >
+                            Clear filters
+                          </button>
+                        </div>
+                      )}
                     {tab === "work" && (
                       <button
                         className="admin-add-category"

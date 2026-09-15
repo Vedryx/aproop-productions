@@ -91,7 +91,7 @@ Everything else (20 client logos, both logo marks) imported fine and lives in
 
 ## Studio admin
 
-Visit `/admin` to manage **Final outputs**, **Be the producer**, and the **two homepage story slots**. The existing public layout is preserved. Film and story changes are stored in MongoDB and read on each public page request; no rebuild is needed. Visitors already viewing a page see changes when they reload.
+Visit `/admin` to manage **Final outputs**, **Be the producer**, and its **two homepage story stars**. The existing public layout is preserved. Film and story changes are stored in MongoDB and read on each public page request; no rebuild is needed. Visitors already viewing a page see changes when they reload.
 
 ### Local setup
 
@@ -112,8 +112,9 @@ The setup script adds missing settings to the ignored `.env.local` file, preserv
 
 - **Final outputs:** add/edit/remove films, paste YouTube links or IDs, set client credits and award badges, change categories, reorder films within a category, and publish/unpublish. Add or rename categories; remove empty ones.
 - **Be the producer:** a dedicated four-step editor (Story details → Poster → Funding → Review & publish) replaces the long side panel. Values stay in place when moving between steps, Next checks the current fields, and Save takes you to any missing or invalid field. Manage title, type, poster, alt text, synopsis, director, stage, closing label, funding goal, manually recorded progress and contribution presets. Upload JPG/PNG/WebP posters up to 5 MB or use HTTPS image URLs. Uploads are persisted in MongoDB GridFS and served from `/media/:id`.
-- **Homepage stories:** choose a published story for each of two slots. A story can occupy only one slot. Unpublishing/removing a story clears its slot. Empty slots show no poster.
-- **Save changes** persists all edits and publishes items marked Published. Incomplete items must have their required fields filled before saving, including drafts. New films/stories start as drafts. Draft content never reaches public page props.
+- **Homepage stars:** click the star beside a saved, published story or in its review screen. Stars update the homepage immediately, with a maximum of two enforced by the server. Unstar a story to make room for another. This action preserves other unsaved edits. Unpublishing/removing a story clears its star when saved.
+- **Less typing:** select formats, production stages and existing directors, or add a custom option. Choose a closing date/month and contribution presets. Posters use an upload-first layout with optional URL and image-description controls. Search and filter published, draft or starred stories.
+- **Save changes** persists all edits and publishes items marked Published. Drafts can be saved with a title before all details are complete; publishing requires the complete fields. New films/stories start as drafts. Draft content never reaches public page props.
 - Existing source content is imported only when the content document is absent. Deleting all films/stories does not re-import them. Source arrays remain solely as initial seed material.
 - Simultaneous editors use revision checks: an outdated save is rejected instead of silently overwriting newer content. After a conflict, keep any intended edits elsewhere and reload the editor.
 
@@ -135,4 +136,4 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Run browser tests after `npm run build`, with the local MongoDB container running. Playwright starts a separate production server at `http://127.0.0.1:3101`, generates test-only credentials, and uses a new `aproop_e2e_*` database that it deletes after the run. Your review server, credentials and content are not used. Tests exercise login, film/category/story CRUD, the four-step editor, validation, drafts, homepage selection, conflict rejection, uploads, desktop/tablet/mobile layouts, forged/expired sessions, CSRF rejection and logout revocation. Screenshots go to ignored `artifacts/` and failures to `test-results/`.
+Run browser tests after `npm run build`, with the local MongoDB container running. Playwright starts a separate production server at `http://127.0.0.1:3101`, generates test-only credentials, and uses a new `aproop_e2e_*` database that it deletes after the run. Your review server, credentials and content are not used. Tests exercise login, film/category/story CRUD, the four-step editor, validation, drafts, immediate homepage stars and their two-story limit, conflict rejection, uploads, desktop/tablet/mobile layouts, forged/expired sessions, CSRF rejection and logout revocation. Screenshots go to ignored `artifacts/` and failures to `test-results/`.

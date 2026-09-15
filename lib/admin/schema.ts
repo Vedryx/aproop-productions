@@ -37,24 +37,40 @@ export const imagePath = z
       return false;
     }
   }, "Upload an image or enter an HTTPS image URL.");
-export const filmSchema = z.object({
-  id: z.string().uuid(),
-  title: text(),
-  client: text(300),
-  vid: z
-    .string()
-    .transform(youtubeId)
-    .pipe(
-      z
-        .string()
-        .regex(
-          /^[\w-]{11}$/,
-          "Enter a valid YouTube link or 11-character video ID.",
-        ),
-    ),
-  award: z.boolean(),
-  published: z.boolean(),
-});
+export const filmSchema = z
+  .object({
+    id: z.string().uuid(),
+    title: text(),
+    client: z.string().trim().max(300),
+    vid: z
+      .string()
+      .transform(youtubeId)
+      .pipe(
+        z
+          .string()
+          .regex(
+            /^(?:[\w-]{11})?$/,
+            "Enter a valid YouTube link or 11-character video ID.",
+          ),
+      ),
+    award: z.boolean(),
+    published: z.boolean(),
+  })
+  .superRefine((film, ctx) => {
+    if (!film.published) return;
+    if (!film.vid)
+      ctx.addIssue({
+        code: "custom",
+        path: ["vid"],
+        message: "Add a YouTube video before publishing.",
+      });
+    if (!film.client)
+      ctx.addIssue({
+        code: "custom",
+        path: ["client"],
+        message: "Add the client or credit before publishing.",
+      });
+  });
 export const shelfSchema = z.object({
   key: text(80).refine(
     (v) => v !== "All",
@@ -72,30 +88,50 @@ export const shelfSchema = z.object({
   list: z.string().max(150),
   films: z.array(filmSchema).max(500),
 });
-export const projectSchema = z.object({
-  id: z.string().uuid(),
-  title: text(),
-  kind: text(80),
-  ph: text(),
-  poster: imagePath,
-  synopsis: text(5000),
-  director: text(),
-  stage: text(),
-  closes: text(100),
-  need: money.min(1),
-  raised: money,
-  backers: z.number().int().min(0).max(10_000_000),
-  options: z
-    .array(money.min(1))
-    .min(1)
-    .max(6)
-    .refine(
-      (v) => new Set(v).size === v.length,
-      "Contribution amounts must be different.",
-    ),
-  published: z.boolean(),
-  homepageSlot: z.union([z.literal(0), z.literal(1), z.literal(2)]),
-});
+export const projectSchema = z
+  .object({
+    id: z.string().uuid(),
+    title: text(),
+    kind: z.string().trim().max(80),
+    ph: z.string().trim().max(200),
+    poster: z.union([z.literal(""), imagePath]),
+    synopsis: z.string().trim().max(5000),
+    director: z.string().trim().max(200),
+    stage: z.string().trim().max(200),
+    closes: z.string().trim().max(100),
+    need: money.min(1),
+    raised: money,
+    backers: z.number().int().min(0).max(10_000_000),
+    options: z
+      .array(money.min(1))
+      .min(1)
+      .max(6)
+      .refine(
+        (v) => new Set(v).size === v.length,
+        "Contribution amounts must be different.",
+      ),
+    published: z.boolean(),
+    homepageSlot: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+  })
+  .superRefine((project, ctx) => {
+    if (!project.published) return;
+    for (const field of [
+      "kind",
+      "ph",
+      "poster",
+      "synopsis",
+      "director",
+      "stage",
+      "closes",
+    ] as const) {
+      if (!project[field])
+        ctx.addIssue({
+          code: "custom",
+          path: [field],
+          message: "Complete this field before publishing.",
+        });
+    }
+  });
 export const contentSchema = z
   .object({
     revision: z.number().int().min(0),

@@ -18,7 +18,9 @@ export function fmtINR(n: number): string {
   const s = String(n);
   const last = s.slice(-3);
   const rest = s.slice(0, -3);
-  return "₹" + (rest ? rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + "," : "") + last;
+  return (
+    "₹" + (rest ? rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + "," : "") + last
+  );
 }
 
 export const projects: Project[] = [
@@ -53,3 +55,16 @@ export const projects: Project[] = [
     options: [5000, 10000, 50000],
   },
 ];
+
+/** ISO calendar dates are stored without a timezone; format without shifting days. */
+export function formatClosingDate(value: string): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  const date = new Date(`${value}T12:00:00Z`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}

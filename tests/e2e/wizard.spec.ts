@@ -40,13 +40,19 @@ test("wizard validation, back navigation, draft persistence and step-specific sa
   await page
     .getByLabel("Synopsis", { exact: true })
     .fill("Draft description kept between steps.");
-  await page.getByLabel("Director", { exact: true }).fill("Wizard director");
+  await page
+    .getByRole("combobox", { name: "Director", exact: true })
+    .selectOption("__custom");
+  await page
+    .getByLabel("Custom director", { exact: true })
+    .fill("Wizard director");
   await page
     .getByRole("button", { name: "Next: Poster →", exact: true })
     .click();
   await expect(
     page.getByRole("heading", { name: "Give it a face." }),
   ).toBeFocused();
+  await page.getByText("Use an image URL", { exact: true }).click();
   await page
     .getByLabel("Poster URL", { exact: true })
     .fill("javascript:alert(1)");
@@ -90,17 +96,18 @@ test("wizard validation, back navigation, draft persistence and step-specific sa
   await expect(
     page.getByLabel("Published on website", { exact: true }),
   ).not.toBeChecked();
-  await page
-    .getByRole("button", { name: "Save story changes ↗", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Save draft", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Saved.");
   expect(await (await api.get("/be-the-producer")).text()).not.toContain(
     "Wizard draft",
   );
+  await page.getByLabel("Published on website", { exact: true }).check();
   await page
     .getByRole("button", { name: "01 Story details", exact: true })
     .click();
-  await page.getByLabel("Director", { exact: true }).fill("");
+  await page
+    .getByRole("combobox", { name: "Director", exact: true })
+    .selectOption("");
   await page
     .getByRole("button", { name: "Save changes ↗", exact: true })
     .click();
@@ -108,14 +115,19 @@ test("wizard validation, back navigation, draft persistence and step-specific sa
     "aria-invalid",
     "true",
   );
-  await page.getByLabel("Director", { exact: true }).fill("Updated director");
+  await page
+    .getByRole("combobox", { name: "Director", exact: true })
+    .selectOption("__custom");
+  await page
+    .getByLabel("Custom director", { exact: true })
+    .fill("Updated director");
   await page
     .getByRole("button", { name: "Save changes ↗", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Saved.");
   await page.reload();
   await page.getByRole("button", { name: /05 Be the producer/ }).click();
-  await page.getByRole("button", { name: /Wizard draft.*Draft/ }).click();
+  await page.getByRole("button", { name: /Edit Wizard draft/ }).click();
   await expect(page.getByLabel("Director", { exact: true })).toHaveValue(
     "Updated director",
   );
@@ -127,7 +139,9 @@ test("all story steps stay usable on desktop, tablet and mobile", async ({
 }) => {
   const api = await signIn(page);
   await page.getByRole("button", { name: /05 Be the producer/ }).click();
-  await page.getByRole("button", { name: /दाटण \/ Datan/ }).click();
+  await page
+    .getByRole("button", { name: "Edit दाटण / Datan", exact: true })
+    .click();
   for (const size of [
     { width: 1440, height: 900 },
     { width: 1024, height: 768 },

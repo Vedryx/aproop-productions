@@ -98,8 +98,13 @@ test("admin CRUD, publication, featured selection, persistence and authenticatio
     expect((await put(current)).ok()).toBeTruthy();
     expect(await (await api.get("/")).text()).toContain("Verification story");
     await page.reload();
-    await page.getByRole("button", { name: /Homepage stories/ }).click();
-    await expect(page.getByLabel("Featured story 1")).toHaveValue(story.id);
+    await page.getByRole("button", { name: /05 Be the producer/ }).click();
+    await expect(
+      page.getByRole("button", {
+        name: "Remove Verification story from homepage",
+        exact: true,
+      }),
+    ).toHaveAttribute("aria-pressed", "true");
     const upload = await api.post("/api/admin/uploads", {
       headers: { ...headers, "Content-Type": "image/png" },
       data: Buffer.from(
@@ -161,7 +166,7 @@ test("admin CRUD, publication, featured selection, persistence and authenticatio
   expect(replay.status()).toBe(401);
 });
 
-test("story editor and homepage selector publish the selected story", async ({
+test("story editor and immediate homepage stars publish the selected story", async ({
   page,
 }) => {
   await page.goto("/admin/login");
@@ -188,7 +193,12 @@ test("story editor and homepage selector publish the selected story", async ({
     await page
       .getByLabel("Synopsis", { exact: true })
       .fill("A story created and edited through the admin form.");
-    await page.getByLabel("Director", { exact: true }).fill("Test director");
+    await page
+      .getByRole("combobox", { name: "Director", exact: true })
+      .selectOption("__custom");
+    await page
+      .getByLabel("Custom director", { exact: true })
+      .fill("Test director");
     await page.getByRole("button", { name: "Save changes ↗" }).click();
     await expect(page.getByRole("status")).toContainText("Saved.");
     expect(await (await api.get("/be-the-producer")).text()).not.toContain(
@@ -217,6 +227,7 @@ test("story editor and homepage selector publish the selected story", async ({
       ),
     });
     await expect(page.getByRole("status")).toContainText("Poster uploaded.");
+    await page.getByText("Use an image URL", { exact: true }).click();
     await expect(page.getByLabel("Poster URL", { exact: true })).toHaveValue(
       /\/media\//,
     );
@@ -246,12 +257,26 @@ test("story editor and homepage selector publish the selected story", async ({
       path: "artifacts/admin-story-editor.png",
       fullPage: true,
     });
-    await page.getByRole("button", { name: /Homepage stories/ }).click();
     await page
-      .getByRole("combobox", { name: "Featured story 2", exact: true })
-      .selectOption(created.id);
-    await page.getByRole("button", { name: "Save changes ↗" }).click();
-    await expect(page.getByRole("status")).toContainText("Saved.");
+      .getByRole("button", { name: "← All stories", exact: true })
+      .click();
+    const previous = original.projects.find((p) => p.homepageSlot === 2)!;
+    await page
+      .getByRole("button", {
+        name: `Remove ${previous.title} from homepage`,
+        exact: true,
+      })
+      .click();
+    await expect(page.getByRole("status")).toContainText(
+      "removed from the homepage",
+    );
+    await page
+      .getByRole("button", {
+        name: "Feature Browser-created story on homepage",
+        exact: true,
+      })
+      .click();
+    await expect(page.getByRole("status")).toContainText("now on the homepage");
     expect(await (await api.get("/")).text()).toContain(
       "Browser-created story",
     );
@@ -272,7 +297,7 @@ test("story editor and homepage selector publish the selected story", async ({
     await publicPage.close();
     await page.getByRole("button", { name: /05 Be the producer/ }).click();
     await page
-      .getByRole("button", { name: /Browser-created story.*Homepage 2/ })
+      .getByRole("button", { name: /Edit Browser-created story/ })
       .click();
     await page
       .getByLabel("Story title", { exact: true })

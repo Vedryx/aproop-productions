@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { randomUUID } from "node:crypto";
 import { contentSchema, youtubeId, type Content } from "../lib/admin/schema";
+import { setFeatured } from "../lib/admin/featured";
 import { projects } from "../lib/producer";
 const content = (): Content => ({
   revision: 0,
@@ -64,4 +65,41 @@ test("rejects invalid goals, duplicate amounts, script image URLs and duplicate 
   const data = content();
   data.projects[1].id = data.projects[0].id;
   assert.equal(contentSchema.safeParse(data).success, false);
+});
+
+test("incomplete drafts can be saved but cannot be published", () => {
+  const data = content();
+  const draft = data.projects[0];
+  Object.assign(draft, {
+    published: false,
+    homepageSlot: 0,
+    poster: "",
+    ph: "",
+    synopsis: "",
+    director: "",
+  });
+  assert.ok(contentSchema.safeParse(data).success);
+  draft.published = true;
+  assert.equal(contentSchema.safeParse(data).success, false);
+});
+
+test("stars enforce the cap, reuse free slots and preserve the source", () => {
+  const original = content();
+  const third = {
+    ...original.projects[0],
+    id: randomUUID(),
+    homepageSlot: 0 as const,
+  };
+  original.projects.push(third);
+  assert.throws(() => setFeatured(original, third.id, true), /Only two/);
+  assert.deepEqual(
+    setFeatured(original, original.projects[0].id, true),
+    original,
+  );
+  const unstarred = setFeatured(original, original.projects[0].id, false);
+  assert.equal(original.projects[0].homepageSlot, 1);
+  const starred = setFeatured(unstarred, third.id, true);
+  assert.equal(starred.projects[2].homepageSlot, 1);
+  third.published = false;
+  assert.throws(() => setFeatured(original, third.id, true), /publish/);
 });

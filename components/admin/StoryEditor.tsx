@@ -2,8 +2,19 @@
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import { projectSchema, type AdminProject } from "@/lib/admin/schema";
-import { fmtINR } from "@/lib/producer";
+import ChoiceField, { ClosingField } from "./ChoiceField";
+import StarButton from "./StarButton";
+import {
+  STORY_FORMATS,
+  PRODUCTION_STAGES,
+  CONTRIBUTION_PRESETS,
+} from "@/lib/admin/editor-options";
+import {
+  projectSchema,
+  imagePath,
+  type AdminProject,
+} from "@/lib/admin/schema";
+import { fmtINR, formatClosingDate } from "@/lib/producer";
 
 export const STORY_STEPS = [
   "Story details",
@@ -24,7 +35,7 @@ export function storyStepFor(field: string) {
   );
 }
 export function storyIssues(project: AdminProject, step?: number) {
-  const result = projectSchema.safeParse(project);
+  const result = projectSchema.safeParse({ ...project, published: true });
   const errors: Record<string, string> = {};
   if (!result.success)
     for (const issue of result.error.issues) {
@@ -49,6 +60,11 @@ type Props = {
   onClose: () => void;
   onRemove: () => void;
   onMove: (direction: number) => void;
+  directorChoices: string[];
+  formatChoices: string[];
+  stageChoices: string[];
+  onStar: () => void;
+  starDisabled: boolean;
 };
 export default function StoryEditor({
   project: p,
@@ -64,13 +80,24 @@ export default function StoryEditor({
   onClose,
   onRemove,
   onMove,
+  directorChoices,
+  formatChoices,
+  stageChoices,
+  onStar,
+  starDisabled,
 }: Props) {
   const heading = useRef<HTMLHeadingElement>(null);
+  const posterDetails = useRef<HTMLDetailsElement>(null);
+  const descriptionDetails = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
   }, [step]);
   useEffect(() => {
     if (!Object.keys(errors).length) return;
+    if (errors.poster && posterDetails.current)
+      posterDetails.current.open = true;
+    if (errors.ph && descriptionDetails.current)
+      descriptionDetails.current.open = true;
     heading.current
       ?.closest(".story-step-body")
       ?.querySelector<HTMLElement>('[aria-invalid="true"]')
@@ -187,23 +214,52 @@ export default function StoryEditor({
         {step === 0 && (
           <div className="story-fields">
             {field("title", "Story title")}
-            {field("kind", "Type / format")}
+            <ChoiceField
+              label="Type / format"
+              value={p.kind}
+              choices={[...STORY_FORMATS, ...formatChoices]}
+              onChange={(kind) => onChange({ kind })}
+              error={errors.kind}
+            />
             {field("synopsis", "Synopsis", true)}
-            {field("director", "Director")}
-            {field("stage", "Production stage")}
-            {field("closes", "Closing date / label")}
+            <ChoiceField
+              label="Director"
+              value={p.director}
+              choices={[...directorChoices, "Aproop team"]}
+              onChange={(director) => onChange({ director })}
+              error={errors.director}
+              customLabel="Add a director…"
+            />
+            <ChoiceField
+              label="Production stage"
+              value={p.stage}
+              choices={[...PRODUCTION_STAGES, ...stageChoices]}
+              onChange={(stage) => onChange({ stage })}
+              error={errors.stage}
+            />
+            <ClosingField
+              value={p.closes}
+              onChange={(closes) => onChange({ closes })}
+              error={errors.closes}
+            />
           </div>
         )}
         {step === 1 && (
           <div className="story-poster-grid">
             <div className="story-poster-preview">
-              <Image
-                unoptimized
-                width={800}
-                height={500}
-                src={p.poster}
-                alt={p.ph || "Story poster preview"}
-              />
+              {imagePath.safeParse(p.poster).success ? (
+                <Image
+                  unoptimized
+                  width={800}
+                  height={500}
+                  src={p.poster}
+                  alt={p.ph || "Story poster preview"}
+                />
+              ) : (
+                <div className="story-no-poster">
+                  Upload your story’s poster
+                </div>
+              )}
               <span>Poster preview</span>
             </div>
             <div className="story-poster-controls">
@@ -219,8 +275,21 @@ export default function StoryEditor({
                 />
                 <small>JPG, PNG or WebP · up to 5 MB</small>
               </label>
-              {field("poster", "Poster URL")}
-              {field("ph", "Image description")}
+              <details className="story-optional" ref={posterDetails}>
+                <summary>Use an image URL</summary>
+                {field("poster", "Poster URL")}
+              </details>
+              {errors.poster && (
+                <span className="story-field-error">{errors.poster}</span>
+              )}
+              <details className="story-optional" ref={descriptionDetails}>
+                <summary>Edit image description</summary>
+                <p className="admin-help">
+                  Starts with the story title. Describe the image here if more
+                  detail would help.
+                </p>
+                {field("ph", "Image description")}
+              </details>
             </div>
           </div>
         )}
@@ -228,6 +297,32 @@ export default function StoryEditor({
           <div className="story-funding-grid">
             <div>
               {field("need", "Funding goal (₹)", false, "number", 1)}
+              <label className="contribution-preset">
+                Contribution preset
+                <select
+                  aria-label="Contribution preset"
+                  value={
+                    CONTRIBUTION_PRESETS.find(
+                      (preset) =>
+                        JSON.stringify(preset.amounts) ===
+                        JSON.stringify(p.options),
+                    )?.name || "custom"
+                  }
+                  onChange={(e) => {
+                    const preset = CONTRIBUTION_PRESETS.find(
+                      (preset) => preset.name === e.target.value,
+                    );
+                    if (preset) onChange({ options: [...preset.amounts] });
+                  }}
+                >
+                  {CONTRIBUTION_PRESETS.map((preset) => (
+                    <option key={preset.name} value={preset.name}>
+                      {preset.name}: {preset.amounts.map(fmtINR).join(" / ")}
+                    </option>
+                  ))}
+                  <option value="custom">Custom amounts</option>
+                </select>
+              </label>
               <fieldset className="story-tiers">
                 <legend>Contribution amounts (₹)</legend>
                 <p className="admin-help">
@@ -303,13 +398,17 @@ export default function StoryEditor({
         {step === 3 && (
           <div className="story-review-grid">
             <div className="story-review-card">
-              <Image
-                unoptimized
-                width={600}
-                height={375}
-                src={p.poster}
-                alt={p.ph}
-              />
+              {imagePath.safeParse(p.poster).success ? (
+                <Image
+                  unoptimized
+                  width={600}
+                  height={375}
+                  src={p.poster}
+                  alt={p.ph}
+                />
+              ) : (
+                <div className="story-no-poster">Poster not added yet</div>
+              )}
               <div>
                 <span className="admin-kicker">{p.kind}</span>
                 <h3>{p.title}</h3>
@@ -333,7 +432,7 @@ export default function StoryEditor({
                   </div>
                   <div>
                     <dt>Closes</dt>
-                    <dd>{p.closes}</dd>
+                    <dd>{formatClosingDate(p.closes)}</dd>
                   </div>
                 </dl>
               </div>
@@ -353,10 +452,22 @@ export default function StoryEditor({
                   ? "This story will appear on Be the Producer after saving."
                   : "This story stays private until you publish it."}
               </p>
+              <StarButton
+                title={p.title}
+                starred={!!p.homepageSlot}
+                disabled={starDisabled || busy}
+                reason={
+                  starDisabled
+                    ? "Save and publish this story before starring it."
+                    : undefined
+                }
+                showLabel
+                onClick={onStar}
+              />
               <p className="admin-help">
-                {p.homepageSlot
-                  ? `Selected for homepage slot ${p.homepageSlot}.`
-                  : "Choose a homepage slot from Homepage stories after publishing."}
+                {starDisabled
+                  ? "Save and publish first, then star this story for the homepage."
+                  : "Stars update the homepage immediately. Maximum two stories."}
               </p>
               {Object.keys(allIssues).length > 0 && (
                 <button
@@ -388,6 +499,11 @@ export default function StoryEditor({
             ← Back
           </button>
           <span>Step {step + 1} of 4</span>
+          {!p.published && step < 3 && (
+            <button disabled={busy || !dirty} onClick={onSave}>
+              Save draft
+            </button>
+          )}
         </div>
         {step < 3 ? (
           <button className="admin-primary" onClick={() => navigate(step + 1)}>
@@ -399,7 +515,7 @@ export default function StoryEditor({
             disabled={busy || !dirty}
             onClick={onSave}
           >
-            Save story changes ↗
+            {p.published ? "Save story changes ↗" : "Save draft"}
           </button>
         )}
       </footer>

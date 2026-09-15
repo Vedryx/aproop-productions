@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { fmtINR } from "@/lib/producer";
+import { fmtINR, formatClosingDate } from "@/lib/producer";
 import type { AdminProject } from "@/lib/admin/schema";
 import SafeImg from "@/components/ui/SafeImg";
 
@@ -64,7 +64,7 @@ export default function ProjectCard({ project: p }: { project: AdminProject }) {
             </div>
             <div>
               <div className={META_LABEL}>Closes</div>
-              <div className={META_VALUE}>{p.closes}</div>
+              <div className={META_VALUE}>{formatClosingDate(p.closes)}</div>
             </div>
           </div>
         </div>
