@@ -111,7 +111,7 @@ The setup script adds missing settings to the ignored `.env.local` file, preserv
 ### Editing
 
 - **Final outputs:** add/edit/remove films, paste YouTube links or IDs, set client credits and award badges, change categories, reorder films within a category, and publish/unpublish. Add or rename categories; remove empty ones.
-- **Be the producer:** manage title, type, poster, alt text, synopsis, director, stage, closing label, funding goal, manually recorded progress and contribution presets. Upload JPG/PNG/WebP posters up to 5 MB or use HTTPS image URLs. Uploads are persisted in MongoDB GridFS and served from `/media/:id`.
+- **Be the producer:** a dedicated four-step editor (Story details → Poster → Funding → Review & publish) replaces the long side panel. Values stay in place when moving between steps, Next checks the current fields, and Save takes you to any missing or invalid field. Manage title, type, poster, alt text, synopsis, director, stage, closing label, funding goal, manually recorded progress and contribution presets. Upload JPG/PNG/WebP posters up to 5 MB or use HTTPS image URLs. Uploads are persisted in MongoDB GridFS and served from `/media/:id`.
 - **Homepage stories:** choose a published story for each of two slots. A story can occupy only one slot. Unpublishing/removing a story clears its slot. Empty slots show no poster.
 - **Save changes** persists all edits and publishes items marked Published. Incomplete items must have their required fields filled before saving, including drafts. New films/stories start as drafts. Draft content never reaches public page props.
 - Existing source content is imported only when the content document is absent. Deleting all films/stories does not re-import them. Source arrays remain solely as initial seed material.
@@ -135,4 +135,4 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Run browser tests with the local server and DB running, and `APP_ORIGIN` matching that server. They exercise login, CRUD, drafts, homepage selection, conflict rejection, uploads, mobile layout and logout revocation. They temporarily modify and then restore the local content. Use a disposable/local database, never a production database. Screenshots go to ignored `artifacts/` and failures to `test-results/`.
+Run browser tests after `npm run build`, with the local MongoDB container running. Playwright starts a separate production server at `http://127.0.0.1:3101`, generates test-only credentials, and uses a new `aproop_e2e_*` database that it deletes after the run. Your review server, credentials and content are not used. Tests exercise login, film/category/story CRUD, the four-step editor, validation, drafts, homepage selection, conflict rejection, uploads, desktop/tablet/mobile layouts, forged/expired sessions, CSRF rejection and logout revocation. Screenshots go to ignored `artifacts/` and failures to `test-results/`.

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { authenticatedApi } from "./helpers";
 import { randomUUID } from "node:crypto";
 import type { Content } from "../../lib/admin/schema";
 
@@ -35,7 +36,7 @@ test("admin CRUD, publication, featured selection, persistence and authenticatio
   await expect(
     page.getByRole("heading", { name: "Final outputs." }),
   ).toBeVisible();
-  const api = page.request;
+  const api = await authenticatedApi(page);
   const original: Content = await (await api.get("/api/admin/content")).json();
   const put = (data: Content) =>
     api.put("/api/admin/content", { data, headers });
@@ -174,9 +175,8 @@ test("story editor and homepage selector publish the selected story", async ({
   await expect(
     page.getByRole("heading", { name: "Final outputs." }),
   ).toBeVisible();
-  const original: Content = await (
-    await page.request.get("/api/admin/content")
-  ).json();
+  const api = await authenticatedApi(page);
+  const original: Content = await (await api.get("/api/admin/content")).json();
   try {
     await page.getByRole("button", { name: /05 Be the producer/ }).click();
     await page
@@ -191,21 +191,53 @@ test("story editor and homepage selector publish the selected story", async ({
     await page.getByLabel("Director", { exact: true }).fill("Test director");
     await page.getByRole("button", { name: "Save changes ↗" }).click();
     await expect(page.getByRole("status")).toContainText("Saved.");
-    expect(
-      await (await page.request.get("/be-the-producer")).text(),
-    ).not.toContain("Browser-created story");
-    await page.getByLabel("Published on website", { exact: true }).check();
+    expect(await (await api.get("/be-the-producer")).text()).not.toContain(
+      "Browser-created story",
+    );
+    await page
+      .getByRole("button", { name: "Next: Poster →", exact: true })
+      .click();
+    await expect(page.getByLabel("Story title", { exact: true })).toHaveCount(
+      0,
+    );
+    await page.getByLabel("Upload poster").setInputFiles({
+      name: "unsafe.svg",
+      mimeType: "image/svg+xml",
+      buffer: Buffer.from("<svg/>"),
+    });
+    await expect(page.locator(".admin-error[role=alert]")).toContainText(
+      "JPG, PNG or WebP",
+    );
+    await page.getByLabel("Upload poster").setInputFiles({
+      name: "poster.png",
+      mimeType: "image/png",
+      buffer: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aOZsAAAAASUVORK5CYII=",
+        "base64",
+      ),
+    });
+    await expect(page.getByRole("status")).toContainText("Poster uploaded.");
+    await expect(page.getByLabel("Poster URL", { exact: true })).toHaveValue(
+      /\/media\//,
+    );
+    await page
+      .getByRole("button", { name: "Next: Funding →", exact: true })
+      .click();
     await page
       .getByRole("button", { name: "Remove amount 3", exact: true })
       .click();
     await page
       .getByRole("button", { name: "Remove amount 2", exact: true })
       .click();
-    await page.getByRole("button", { name: "Save changes ↗" }).click();
+    await page
+      .getByRole("button", { name: "Next: Review & publish →", exact: true })
+      .click();
+    await page.getByLabel("Published on website", { exact: true }).check();
+    await page
+      .getByRole("button", { name: "Save story changes ↗", exact: true })
+      .click();
     await expect(page.getByRole("status")).toContainText("Saved.");
-    let current: Content = await (
-      await page.request.get("/api/admin/content")
-    ).json();
+    let current: Content = await (await api.get("/api/admin/content")).json();
     const created = current.projects.find(
       (p) => p.title === "Browser-created story",
     )!;
@@ -220,7 +252,7 @@ test("story editor and homepage selector publish the selected story", async ({
       .selectOption(created.id);
     await page.getByRole("button", { name: "Save changes ↗" }).click();
     await expect(page.getByRole("status")).toContainText("Saved.");
-    expect(await (await page.request.get("/")).text()).toContain(
+    expect(await (await api.get("/")).text()).toContain(
       "Browser-created story",
     );
     await page.screenshot({
@@ -247,31 +279,33 @@ test("story editor and homepage selector publish the selected story", async ({
       .fill("Updated browser story");
     await page.getByRole("button", { name: "Save changes ↗" }).click();
     await expect(page.getByRole("status")).toContainText("Saved.");
-    expect(await (await page.request.get("/be-the-producer")).text()).toContain(
+    expect(await (await api.get("/be-the-producer")).text()).toContain(
       "Updated browser story",
     );
+    await page
+      .getByRole("button", { name: "04 Review & publish", exact: true })
+      .click();
+    await page.getByText("Ordering and removal", { exact: true }).click();
     page.once("dialog", (dialog) => dialog.accept());
     await page
       .getByRole("button", { name: "Remove story", exact: true })
       .click();
     await page.getByRole("button", { name: "Save changes ↗" }).click();
     await expect(page.getByRole("status")).toContainText("Saved.");
-    current = await (await page.request.get("/api/admin/content")).json();
+    current = await (await api.get("/api/admin/content")).json();
     expect(current.projects.some((p) => p.id === created.id)).toBeFalsy();
     expect(current.projects.some((p) => p.homepageSlot === 2)).toBeFalsy();
   } finally {
     test.setTimeout(test.info().timeout + 15_000);
-    const latest: Content = await (
-      await page.request.get("/api/admin/content")
-    ).json();
+    const latest: Content = await (await api.get("/api/admin/content")).json();
     expect(
       (
-        await page.request.put("/api/admin/content", {
+        await api.put("/api/admin/content", {
           headers,
           data: { ...original, revision: latest.revision },
         })
       ).ok(),
     ).toBeTruthy();
-    await page.request.post("/api/admin/logout", { headers });
+    await api.post("/api/admin/logout", { headers });
   }
 });

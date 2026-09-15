@@ -3,7 +3,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { AdminFilm, AdminProject, Content } from "@/lib/admin/schema";
-import { youtubeId } from "@/lib/admin/schema";
+import StoryEditor, { storyStepFor } from "./StoryEditor";
+import { contentSchema, youtubeId } from "@/lib/admin/schema";
 
 type Selection =
   { kind: "film"; id: string } | { kind: "project"; id: string } | null;
@@ -54,6 +55,8 @@ export default function AdminEditor({
   const [saved, setSaved] = useState(JSON.stringify(initial));
   const [tab, setTab] = useState<"work" | "stories" | "homepage">("work");
   const [selection, setSelection] = useState<Selection>(null);
+  const [storyStep, setStoryStep] = useState(0);
+  const [storyErrors, setStoryErrors] = useState<Record<string, string>>({});
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -77,6 +80,7 @@ export default function AdminEditor({
     });
     setNotice("");
     setError("");
+    setStoryErrors({});
   };
   const films = content.shelves.flatMap((s, si) =>
     s.films.map((f) => ({ ...f, si, category: s.key })),
@@ -132,6 +136,12 @@ export default function AdminEditor({
     });
     setSelection({ kind: "film", id });
   };
+  const openProject = (id: string) => {
+    setSelection({ kind: "project", id });
+    setStoryStep(0);
+    setStoryErrors({});
+    window.scrollTo({ top: 0 });
+  };
   const addProject = () => {
     const id = crypto.randomUUID();
     update((d) => {
@@ -153,7 +163,7 @@ export default function AdminEditor({
         homepageSlot: 0,
       });
     });
-    setSelection({ kind: "project", id });
+    openProject(id);
   };
   const remove = () => {
     const name = film?.title || project?.title;
@@ -181,6 +191,28 @@ export default function AdminEditor({
         [list[index], list[target]] = [list[target], list[index]];
     });
   async function save() {
+    const parsed = contentSchema.safeParse(content);
+    if (!parsed.success) {
+      const issue = parsed.error.issues[0];
+      if (issue.path[0] === "projects" && typeof issue.path[1] === "number") {
+        const invalid = content.projects[issue.path[1]];
+        setTab("stories");
+        setSelection({ kind: "project", id: invalid.id });
+        setStoryStep(storyStepFor(String(issue.path[2])));
+        const fields: Record<string, string> = {};
+        for (const item of parsed.error.issues)
+          if (item.path[0] === "projects" && item.path[1] === issue.path[1])
+            fields[String(item.path[2])] = item.message;
+        setStoryErrors(fields);
+        setError(
+          `Check the highlighted fields in “${invalid.title}”. Your changes have not been saved.`,
+        );
+      } else {
+        setError(issue.message);
+      }
+      window.scrollTo({ top: 0 });
+      return;
+    }
     setBusy(true);
     setError("");
     setNotice("");
@@ -188,7 +220,7 @@ export default function AdminEditor({
       const response = await fetch("/api/admin/content", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(content),
+        body: JSON.stringify(parsed.data),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
@@ -230,7 +262,7 @@ export default function AdminEditor({
     }
   }
   return (
-    <div className="admin-shell">
+    <div className={`admin-shell ${project ? "is-editing-story" : ""}`}>
       <aside className="admin-sidebar">
         <a className="admin-wordmark" href="/" target="_blank" rel="noreferrer">
           APROOP<span>PRODUCTION / STUDIO ADMIN</span>
@@ -322,7 +354,7 @@ export default function AdminEditor({
             </button>
           </div>
         </header>
-        <div className="admin-content">
+        <div className={`admin-content ${project ? "admin-story-active" : ""}`}>
           <p className="admin-kicker">YOUR STUDIO, ON SCREEN</p>
           <h1>
             {tab === "work"
@@ -422,6 +454,23 @@ export default function AdminEditor({
                   Unpublishing or removing a story clears its slot.
                 </p>
               </>
+            ) : project ? (
+              <StoryEditor
+                key={project.id}
+                project={project}
+                step={storyStep}
+                errors={storyErrors}
+                busy={busy}
+                dirty={dirty}
+                onChange={editProject}
+                onStep={setStoryStep}
+                onErrors={setStoryErrors}
+                onUpload={upload}
+                onSave={save}
+                onClose={() => setSelection(null)}
+                onRemove={remove}
+                onMove={move}
+              />
             ) : (
               <>
                 <div className="admin-toolbar">
@@ -557,9 +606,7 @@ export default function AdminEditor({
                             <button
                               className={`admin-row ${selection?.id === p.id ? "selected" : ""}`}
                               key={p.id}
-                              onClick={() =>
-                                setSelection({ kind: "project", id: p.id })
-                              }
+                              onClick={() => openProject(p.id)}
                             >
                               <div className="admin-thumb">
                                 <Image
@@ -622,7 +669,7 @@ export default function AdminEditor({
                       </p>
                     )}
                   </div>
-                  {(film || project) && (
+                  {film && (
                     <section className="admin-panel admin-editor">
                       <div className="admin-editor-heading">
                         <p className="admin-kicker">
@@ -699,162 +746,6 @@ export default function AdminEditor({
                             />
                             Published on website
                           </label>
-                        </>
-                      )}
-                      {project && (
-                        <>
-                          <Field
-                            label="Story title"
-                            value={project.title}
-                            onChange={(title) => editProject({ title })}
-                          />
-                          <Field
-                            label="Type / format"
-                            value={project.kind}
-                            onChange={(kind) => editProject({ kind })}
-                          />
-                          <div className="admin-feature-preview">
-                            <Image
-                              unoptimized
-                              width={800}
-                              height={500}
-                              src={project.poster}
-                              alt={project.ph}
-                            />
-                          </div>
-                          <label className="admin-upload">
-                            Upload poster
-                            <input
-                              type="file"
-                              accept="image/jpeg,image/png,image/webp"
-                              onChange={(e) => {
-                                void upload(e.target.files?.[0]);
-                                e.target.value = "";
-                              }}
-                            />
-                            <small>JPG, PNG or WebP · up to 5 MB</small>
-                          </label>
-                          <Field
-                            label="Poster URL"
-                            value={project.poster}
-                            onChange={(poster) => editProject({ poster })}
-                          />
-                          <Field
-                            label="Image description"
-                            value={project.ph}
-                            onChange={(ph) => editProject({ ph })}
-                          />
-                          <Field
-                            label="Synopsis"
-                            multiline
-                            value={project.synopsis}
-                            onChange={(synopsis) => editProject({ synopsis })}
-                          />
-                          <Field
-                            label="Director"
-                            value={project.director}
-                            onChange={(director) => editProject({ director })}
-                          />
-                          <Field
-                            label="Production stage"
-                            value={project.stage}
-                            onChange={(stage) => editProject({ stage })}
-                          />
-                          <Field
-                            label="Closing date / label"
-                            value={project.closes}
-                            onChange={(closes) => editProject({ closes })}
-                          />
-                          <div className="admin-two-fields">
-                            <Field
-                              label="Funding goal (₹)"
-                              type="number"
-                              min={1}
-                              value={project.need}
-                              onChange={(v) => editProject({ need: Number(v) })}
-                            />
-                            <Field
-                              label="Raised so far (₹)"
-                              type="number"
-                              value={project.raised}
-                              onChange={(v) =>
-                                editProject({ raised: Number(v) })
-                              }
-                            />
-                          </div>
-                          <Field
-                            label="Producer count"
-                            type="number"
-                            value={project.backers}
-                            onChange={(v) =>
-                              editProject({ backers: Number(v) })
-                            }
-                          />
-                          <p className="admin-help">
-                            Funding totals are manually recorded for now. The
-                            existing figures came from the original site; verify
-                            them before launch.
-                          </p>
-                          <label>Contribution amounts (₹)</label>
-                          {project.options.map((amount, i) => (
-                            <div className="admin-tier" key={i}>
-                              <input
-                                aria-label={`Contribution amount ${i + 1}`}
-                                type="number"
-                                min={1}
-                                value={amount}
-                                onChange={(e) =>
-                                  editProject({
-                                    options: project.options.map((v, n) =>
-                                      n === i ? Number(e.target.value) : v,
-                                    ),
-                                  })
-                                }
-                              />
-                              <button
-                                aria-label={`Remove amount ${i + 1}`}
-                                disabled={project.options.length === 1}
-                                onClick={() =>
-                                  editProject({
-                                    options: project.options.filter(
-                                      (_, n) => n !== i,
-                                    ),
-                                  })
-                                }
-                              >
-                                ×
-                              </button>
-                            </div>
-                          ))}
-                          <button
-                            disabled={project.options.length >= 6}
-                            onClick={() =>
-                              editProject({
-                                options: [
-                                  ...project.options,
-                                  Math.max(...project.options) + 1000,
-                                ],
-                              })
-                            }
-                          >
-                            + Add contribution amount
-                          </button>
-                          <label className="admin-check">
-                            <input
-                              type="checkbox"
-                              checked={project.published}
-                              onChange={(e) =>
-                                editProject({ published: e.target.checked })
-                              }
-                            />
-                            Published on website
-                          </label>
-                          <p className="admin-help">
-                            {project.homepageSlot
-                              ? `Featured in homepage slot ${project.homepageSlot}.`
-                              : "Not featured on the homepage."}{" "}
-                            Choose featured stories in Homepage stories.
-                          </p>
                         </>
                       )}
                       <div className="admin-editor-bottom">
