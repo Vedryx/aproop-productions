@@ -7,15 +7,25 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "assets": "bash scripts/import-assets.sh"
+    "assets": "bash scripts/import-assets.sh",
+    "setup:admin": "node scripts/setup-admin.mjs",
+    "db:up": "docker compose up -d",
+    "db:stop": "docker compose stop",
+    "test": "tsx --test tests/schema.test.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
+    "jose": "^6.2.12",
+    "mongodb": "^7.6.0",
     "next": "16.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "resend": "^6.25.0"
+    "resend": "^6.25.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -23,6 +33,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.3",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5"
   }
 }

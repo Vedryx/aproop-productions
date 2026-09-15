@@ -1,18 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { fmtINR, type Project } from "@/lib/producer";
+import { fmtINR } from "@/lib/producer";
+import type { AdminProject } from "@/lib/admin/schema";
 import SafeImg from "@/components/ui/SafeImg";
 
 const META_LABEL =
   "mb-1.5 text-[11px] uppercase tracking-[0.22em] text-muted-3";
 const META_VALUE = "text-sm text-muted-2";
-const PANEL_LABEL =
-  "mb-2 text-[11px] uppercase tracking-[0.22em] text-muted";
+const PANEL_LABEL = "mb-2 text-[11px] uppercase tracking-[0.22em] text-muted";
 
-export default function ProjectCard({ project: p }: { project: Project }) {
+export default function ProjectCard({ project: p }: { project: AdminProject }) {
   // The design opens on the second tier (₹10,000) and seeds Custom at ₹25,000.
-  const [pick, setPick] = useState(1);
+  const [pick, setPick] = useState(Math.min(1, p.options.length - 1));
   const [custom, setCustom] = useState(25000);
 
   const customOpen = pick === p.options.length;
@@ -29,7 +29,11 @@ export default function ProjectCard({ project: p }: { project: Project }) {
   )}&body=${encodeURIComponent(body)}`;
 
   return (
-    <article className="bp-card grid grid-cols-[minmax(0,1.05fr)_minmax(0,.95fr)] border border-[rgba(244,239,228,.1)] bg-panel">
+    <article
+      id={`story-${p.id}`}
+      style={{ scrollMarginTop: 100 }}
+      className="bp-card grid grid-cols-[minmax(0,1.05fr)_minmax(0,.95fr)] border border-[rgba(244,239,228,.1)] bg-panel"
+    >
       <div className="flex min-w-0 flex-col">
         <div className="relative aspect-video overflow-hidden border-b border-[rgba(244,239,228,.09)] bg-ink-darker">
           <SafeImg
@@ -168,9 +172,9 @@ export default function ProjectCard({ project: p }: { project: Project }) {
         </a>
 
         <p className="m-0 text-[12px] font-light leading-[1.6] text-[#6f6a63]">
-          Every contribution gets a producer credit, a first-cut screening invite,
-          and a signed script page. We&apos;ll share payment details and paperwork
-          over email.
+          Every contribution gets a producer credit, a first-cut screening
+          invite, and a signed script page. We&apos;ll share payment details and
+          paperwork over email.
         </p>
       </div>
     </article>

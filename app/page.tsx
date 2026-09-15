@@ -1,3 +1,4 @@
+import { getPublicContent } from "@/lib/admin/content";
 import About from "@/components/sections/About";
 import Brands from "@/components/sections/Brands";
 import Contact from "@/components/sections/Contact";
@@ -13,7 +14,10 @@ import Reveal from "@/components/system/Reveal";
 import Services from "@/components/sections/Services";
 import Work from "@/components/sections/Work";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const content = await getPublicContent();
   return (
     <div className="relative min-h-screen bg-ink font-body text-cream">
       <Reveal />
@@ -25,12 +29,12 @@ export default function Home() {
         jingles
       </h1>
       <Hero />
-      <Work />
+      <Work shelfData={content.shelves} />
       <Brands />
       <Services />
       <About />
       <Makers />
-      <Producer />
+      <Producer projects={content.projects} />
       <Contact />
       <Faq />
       <Footer />

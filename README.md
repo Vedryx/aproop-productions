@@ -88,3 +88,51 @@ Everything else (20 client logos, both logo marks) imported fine and lives in
   own? Pitch it to us" line under the projects — the one addition to the canvas.
 - The canvas has no breakpoints; the funding panel stacks under the film below
   900px (see `.bp-card` in `globals.css`).
+
+## Studio admin
+
+Visit `/admin` to manage **Final outputs**, **Be the producer**, and the **two homepage story slots**. The existing public layout is preserved. Film and story changes are stored in MongoDB and read on each public page request; no rebuild is needed. Visitors already viewing a page see changes when they reload.
+
+### Local setup
+
+```sh
+npm install
+npm run setup:admin
+npm run db:up
+npm run dev
+```
+
+Docker Desktop must be running. `compose.yaml` starts only MongoDB, binds it to loopback port **27019**, and uses a named volume. `npm run db:stop` stops the container without removing data. Do not use `docker compose down -v` unless you intend to erase it.
+
+The setup script adds missing settings to the ignored `.env.local` file, preserving existing values. It generates a random password and JWT secret, with `admin@aproop.local` as the temporary email. Replace `ADMIN_EMAIL` and `ADMIN_PASSWORD` with the supplied credentials, then restart Next.js. Passwords must be at least 12 characters; the JWT secret at least 32. There is no public registration or default production login. Do not send credentials through Git.
+
+`APP_ORIGIN` must exactly match the browser origin (scheme, hostname and port), with no trailing slash. For example, if port 3000 is occupied, run `npm run dev -- --port 3001` and set `APP_ORIGIN=http://localhost:3001` before starting the server. Use that exact URL in the browser.
+
+### Editing
+
+- **Final outputs:** add/edit/remove films, paste YouTube links or IDs, set client credits and award badges, change categories, reorder films within a category, and publish/unpublish. Add or rename categories; remove empty ones.
+- **Be the producer:** manage title, type, poster, alt text, synopsis, director, stage, closing label, funding goal, manually recorded progress and contribution presets. Upload JPG/PNG/WebP posters up to 5 MB or use HTTPS image URLs. Uploads are persisted in MongoDB GridFS and served from `/media/:id`.
+- **Homepage stories:** choose a published story for each of two slots. A story can occupy only one slot. Unpublishing/removing a story clears its slot. Empty slots show no poster.
+- **Save changes** persists all edits and publishes items marked Published. Incomplete items must have their required fields filled before saving, including drafts. New films/stories start as drafts. Draft content never reaches public page props.
+- Existing source content is imported only when the content document is absent. Deleting all films/stories does not re-import them. Source arrays remain solely as initial seed material.
+- Simultaneous editors use revision checks: an outdated save is rejected instead of silently overwriting newer content. After a conflict, keep any intended edits elsewhere and reload the editor.
+
+### Authentication and storage
+
+Single owner account configured through server environment variables. Sessions use HS256 JWTs in HttpOnly, SameSite=Strict cookies (Secure under production), with an eight-hour expiry and server-side session records. Every admin API checks authentication. Signing out revokes the stored session, and changing credentials invalidates older tokens. Mutation routes require the configured same origin. Login attempts are limited in MongoDB to ten per fifteen-minute account-wide window; this intentionally also applies across app instances.
+
+The site requires MongoDB at runtime. The local container has no database authentication and is loopback-only; do not expose it publicly. For production, set `MONGODB_URI` to a persistent authenticated MongoDB service, configure backups/access restrictions, use the HTTPS `APP_ORIGIN`, and supply separate admin credentials/JWT secret. Never point a deployed site at the local container. GridFS content and the database must be backed up together. Uploaded images are public once their URL is known; unused uploads are retained, not automatically deleted.
+
+The initial producer funding totals were copied from the previous static site, not verified payment records. Confirm those values before public use. Cashfree is **planned only**: see [Cashfree payment plan](docs/CASHFREE-PLAN.md). Existing contribution email behavior remains active.
+
+### Verification
+
+```sh
+npm run test
+npm run lint
+npm run build
+npx playwright install chromium
+npm run test:e2e
+```
+
+Run browser tests with the local server and DB running, and `APP_ORIGIN` matching that server. They exercise login, CRUD, drafts, homepage selection, conflict rejection, uploads, mobile layout and logout revocation. They temporarily modify and then restore the local content. Use a disposable/local database, never a production database. Screenshots go to ignored `artifacts/` and failures to `test-results/`.

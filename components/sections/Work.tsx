@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { shelfData, type Film, type Shelf } from "@/lib/data";
+import { type Film, type Shelf } from "@/lib/data";
 import Eyebrow from "@/components/ui/Eyebrow";
 import Poster from "@/components/ui/Poster";
 import VideoModal, { type PlayTarget } from "@/components/ui/VideoModal";
@@ -18,7 +18,7 @@ type Card = {
 };
 
 /** "All" interleaves the categories row by row so the grid stays varied. */
-function buildAll(): Card[] {
+function buildAll(shelfData: Shelf[]): Card[] {
   const lists = shelfData.filter((s) => s.films.length);
   const depth = Math.max(...lists.map((s) => s.films.length));
   const rows: Card[] = [];
@@ -42,16 +42,16 @@ function toCard(s: Shelf, f: Film, i: number): Card {
   };
 }
 
-export default function Work() {
+export default function Work({ shelfData }: { shelfData: Shelf[] }) {
   const [cat, setCat] = useState("All");
   const [page, setPage] = useState(0);
   const [play, setPlay] = useState<PlayTarget>(null);
 
   const cards = useMemo(() => {
-    if (cat === "All") return buildAll();
+    if (cat === "All") return buildAll(shelfData);
     const active = shelfData.find((s) => s.key === cat);
     return active ? active.films.map((f, i) => toCard(active, f, i)) : [];
-  }, [cat]);
+  }, [cat, shelfData]);
 
   const pageCount = Math.ceil(cards.length / PER_PAGE);
   const current = Math.min(page, Math.max(0, pageCount - 1));
@@ -148,7 +148,9 @@ export default function Work() {
 
               <button
                 type="button"
-                onClick={() => setPlay({ id: c.vid, title: c.title, single: true })}
+                onClick={() =>
+                  setPlay({ id: c.vid, title: c.title, single: true })
+                }
                 aria-label={`Play ${c.title}`}
                 className="group absolute inset-0 flex h-full w-full cursor-pointer items-center justify-center border-none bg-[rgba(15,14,13,.34)] p-0 transition-colors duration-300 hover:bg-[rgba(15,14,13,.12)]"
               >
@@ -200,7 +202,9 @@ export default function Work() {
             aria-label="Previous page"
             disabled={current === 0}
             className={`flex h-11 w-11 flex-none items-center justify-center border-none text-base leading-none transition-colors duration-300 ${
-              current > 0 ? "cursor-pointer text-gold" : "cursor-default text-[#4d4842]"
+              current > 0
+                ? "cursor-pointer text-gold"
+                : "cursor-default text-[#4d4842]"
             }`}
           >
             ←

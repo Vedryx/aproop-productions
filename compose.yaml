@@ -1,0 +1,16 @@
+services:
+  mongodb:
+    image: mongo:8.0
+    ports:
+      - "127.0.0.1:27019:27017"
+    volumes:
+      - aproop_mongodb:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test:
+        ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+volumes:
+  aproop_mongodb:
