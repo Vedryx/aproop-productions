@@ -1216,6 +1216,15 @@
 .choice-custom {
   margin-top: 8px;
 }
+.closing-month-year {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+.closing-month-year > label {
+  margin-bottom: 0;
+}
 .story-optional {
   border: 1px solid var(--ad-line);
   border-radius: 6px;

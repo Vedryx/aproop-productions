@@ -4,6 +4,7 @@ import {
   closingMode,
   monthLabel,
   monthValue,
+  MONTHS,
 } from "@/lib/admin/editor-options";
 
 export default function ChoiceField({
@@ -66,6 +67,69 @@ export default function ChoiceField({
     </div>
   );
 }
+
+function MonthYearField({
+  value,
+  onChange,
+  error,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+}) {
+  const id = useId();
+  const currentYear = new Date().getFullYear();
+  const [pendingYear, setPendingYear] = useState(String(currentYear));
+  const [savedYear, month = ""] = monthValue(value).split("-");
+  const year = savedYear || pendingYear;
+  const years = [
+    ...new Set([
+      ...Array.from({ length: 31 }, (_, i) => String(currentYear - 10 + i)),
+      year,
+    ]),
+  ].sort();
+
+  return (
+    <div className="closing-month-year">
+      <label htmlFor={`${id}-month`}>
+        Month
+        <select
+          id={`${id}-month`}
+          aria-label="Closing month"
+          aria-invalid={!!error}
+          value={month}
+          onChange={(e) => onChange(monthLabel(`${year}-${e.target.value}`))}
+        >
+          <option value="" disabled>
+            Choose month
+          </option>
+          {MONTHS.map((name, i) => (
+            <option key={name} value={String(i + 1).padStart(2, "0")}>
+              {name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label htmlFor={`${id}-year`}>
+        Year
+        <select
+          id={`${id}-year`}
+          aria-label="Closing year"
+          value={year}
+          onChange={(e) => {
+            setPendingYear(e.target.value);
+            if (month) onChange(monthLabel(`${e.target.value}-${month}`));
+          }}
+        >
+          {years.map((option) => (
+            <option key={option}>{option}</option>
+          ))}
+        </select>
+      </label>
+    </div>
+  );
+}
+
 export function ClosingField({
   value,
   onChange,
@@ -104,14 +168,7 @@ export function ClosingField({
         />
       )}
       {mode === "month" && (
-        <input
-          className="choice-custom"
-          type="month"
-          aria-label="Closing month"
-          aria-invalid={!!error}
-          value={monthValue(value)}
-          onChange={(e) => onChange(monthLabel(e.target.value))}
-        />
+        <MonthYearField value={value} onChange={onChange} error={error} />
       )}
       {mode === "custom" && (
         <input
