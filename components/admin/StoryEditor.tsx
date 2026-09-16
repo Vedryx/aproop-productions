@@ -273,7 +273,7 @@ export default function StoryEditor({
                     e.target.value = "";
                   }}
                 />
-                <small>JPG, PNG or WebP · up to 5 MB</small>
+                <small>JPG, PNG or WebP · up to 4 MB</small>
               </label>
               <details className="story-optional" ref={posterDetails}>
                 <summary>Use an image URL</summary>

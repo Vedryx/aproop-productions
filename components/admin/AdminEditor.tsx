@@ -369,8 +369,8 @@ export default function AdminEditor({
   }
   async function upload(file?: File) {
     if (!file || !project) return;
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Images must be smaller than 5 MB.");
+    if (file.size > 4 * 1024 * 1024) {
+      setError("Images must be at most 4 MB.");
       return;
     }
     setBusy(true);

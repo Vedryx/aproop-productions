@@ -2,7 +2,7 @@ import { GridFSBucket } from "mongodb";
 import { database } from "@/lib/admin/db";
 import { getSession } from "@/lib/admin/auth";
 import { failure, HttpError, json, sameOrigin } from "@/lib/admin/http";
-const MAX = 5 * 1024 * 1024;
+const MAX = 4 * 1024 * 1024;
 export async function POST(request: Request) {
   try {
     sameOrigin(request);
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       size += value.byteLength;
       if (size > MAX) {
         await reader.cancel();
-        throw new HttpError("Images must be smaller than 5 MB.", 413);
+        throw new HttpError("Images must be at most 4 MB.", 413);
       }
       chunks.push(value);
     }

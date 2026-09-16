@@ -112,6 +112,14 @@ test("admin CRUD, publication, featured selection, persistence and authenticatio
         "base64",
       ),
     });
+    expect(
+      (
+        await api.post("/api/admin/uploads", {
+          headers: { ...headers, "Content-Type": "image/png" },
+          data: Buffer.alloc(4 * 1024 * 1024 + 1),
+        })
+      ).status(),
+    ).toBe(413);
     expect(upload.status()).toBe(201);
     const media = await upload.json();
     const image = await request.get(media.url);
