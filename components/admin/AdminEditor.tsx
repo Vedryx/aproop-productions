@@ -65,6 +65,32 @@ export default function AdminEditor({
   const [notice, setNotice] = useState("");
   const dirty = JSON.stringify(content) !== saved;
   const savedContent: Content = JSON.parse(saved);
+  const workDirty =
+    JSON.stringify(content.shelves) !== JSON.stringify(savedContent.shelves);
+  const storiesDirty =
+    JSON.stringify(content.projects) !== JSON.stringify(savedContent.projects);
+  const sectionDirty = tab === "work" ? workDirty : storiesDirty;
+  const savedFilms = savedContent.shelves.flatMap((s) => s.films);
+  function publicationBadge(item: AdminFilm | AdminProject) {
+    const persisted = [...savedFilms, ...savedContent.projects].find(
+      (p) => p.id === item.id,
+    );
+    const changed = JSON.stringify(item) !== JSON.stringify(persisted);
+    const status =
+      item.published !== !!persisted?.published
+        ? item.published
+          ? "Ready to publish"
+          : "Unpublish pending"
+        : persisted?.published
+          ? "Published"
+          : "Draft";
+    return (
+      <span className={`admin-badge ${persisted?.published ? "live" : ""}`}>
+        {status}
+        {changed ? " · Unsaved" : ""}
+      </span>
+    );
+  }
   const matchesStatus = (item: { published: boolean; homepageSlot?: number }) =>
     statusFilter === "all" ||
     (statusFilter === "published" && item.published) ||
@@ -257,12 +283,19 @@ export default function AdminEditor({
         [list[index], list[target]] = [list[target], list[index]];
     });
   async function save() {
-    const parsed = contentSchema.safeParse(content);
+    // Keep unfinished edits in the other section out of this save, while the
+    // shared revision still protects against another tab overwriting content.
+    const candidate = {
+      ...content,
+      shelves: tab === "work" ? content.shelves : savedContent.shelves,
+      projects: tab === "stories" ? content.projects : savedContent.projects,
+    };
+    setNotice("");
+    const parsed = contentSchema.safeParse(candidate);
     if (!parsed.success) {
       const issue = parsed.error.issues[0];
       if (issue.path[0] === "projects" && typeof issue.path[1] === "number") {
         const invalid = content.projects[issue.path[1]];
-        setTab("stories");
         setSelection({ kind: "project", id: invalid.id });
         setStoryStep(storyStepFor(String(issue.path[2])));
         const fields: Record<string, string> = {};
@@ -274,7 +307,21 @@ export default function AdminEditor({
           `Check the highlighted fields in “${invalid.title}”. Your changes have not been saved.`,
         );
       } else {
-        setError(issue.message);
+        const invalidFilm =
+          issue.path[0] === "shelves" &&
+          typeof issue.path[1] === "number" &&
+          issue.path[2] === "films" &&
+          typeof issue.path[3] === "number"
+            ? content.shelves[issue.path[1]].films[issue.path[3]]
+            : undefined;
+        if (invalidFilm) {
+          setSelection({ kind: "film", id: invalidFilm.id });
+          setQuery("");
+          setStatusFilter("all");
+        }
+        setError(
+          `${invalidFilm ? `“${invalidFilm.title}”: ` : ""}${issue.message} Your changes have not been saved.`,
+        );
       }
       window.scrollTo({ top: 0 });
       return;
@@ -290,9 +337,26 @@ export default function AdminEditor({
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
-      setContent(data);
+      setContent((previous) => ({
+        ...previous,
+        revision: data.revision,
+        ...(tab === "work"
+          ? { shelves: data.shelves }
+          : { projects: data.projects }),
+      }));
       setSaved(JSON.stringify(data));
-      setNotice("Saved. Published content is now live on the website.");
+      const savedFilm = film
+        ? data.shelves
+            .flatMap((s: Content["shelves"][number]) => s.films)
+            .find((f: AdminFilm) => f.id === film.id)
+        : undefined;
+      setNotice(
+        savedFilm
+          ? savedFilm.published
+            ? `Saved. “${savedFilm.title}” is published in ${film?.category} on the homepage.`
+            : `Saved. “${savedFilm.title}” is a draft and is not visible on the website.`
+          : `Saved. ${tab === "work" ? "Final outputs" : "Be the producer"} updated. Published items are visible on the website; drafts stay private.`,
+      );
     } catch (error) {
       setError(
         error instanceof Error
@@ -353,6 +417,8 @@ export default function AdminEditor({
                 setSelection(null);
                 setQuery("");
                 setStatusFilter("all");
+                setError("");
+                setNotice("");
               }}
             >
               <span>{number}</span>
@@ -399,7 +465,11 @@ export default function AdminEditor({
         <header className="admin-topbar">
           <div>
             <span className={`admin-dot ${dirty ? "pending" : ""}`} />
-            {dirty ? "Unsaved changes" : "All changes saved"}
+            {sectionDirty
+              ? "Unsaved changes"
+              : dirty
+                ? `Unsaved changes in ${tab === "work" ? "Be the producer" : "Final outputs"}`
+                : "All changes saved"}
           </div>
           <div className="admin-actions">
             <button
@@ -417,7 +487,7 @@ export default function AdminEditor({
             </button>
             <button
               className="admin-primary"
-              disabled={busy || !dirty}
+              disabled={busy || !sectionDirty}
               onClick={save}
             >
               {busy ? "Working…" : "Save changes ↗"}
@@ -453,7 +523,7 @@ export default function AdminEditor({
                 step={storyStep}
                 errors={storyErrors}
                 busy={busy}
-                dirty={dirty}
+                dirty={storiesDirty}
                 onChange={editProject}
                 onStep={setStoryStep}
                 onErrors={setStoryErrors}
@@ -619,11 +689,7 @@ export default function AdminEditor({
                                       {f.client || "Add client / credit"}
                                     </small>
                                   </div>
-                                  <span
-                                    className={`admin-badge ${f.published ? "live" : ""}`}
-                                  >
-                                    {f.published ? "Published" : "Draft"}
-                                  </span>
+                                  {publicationBadge(f)}
                                   <span>↗</span>
                                 </button>
                               ))}
@@ -663,11 +729,7 @@ export default function AdminEditor({
                                   {p.homepageSlot ? " · On homepage" : ""}
                                 </small>
                               </div>
-                              <span
-                                className={`admin-badge ${p.published ? "live" : ""}`}
-                              >
-                                {p.published ? "Published" : "Draft"}
-                              </span>
+                              {publicationBadge(p)}
                               <span>↗</span>
                             </button>
                             <StarButton
@@ -821,6 +883,24 @@ export default function AdminEditor({
                             />
                             Published on website
                           </label>
+                          <p className="admin-help">
+                            Publication changes take effect after saving. The
+                            homepage shows four films per page; use its category
+                            tabs to find more.
+                          </p>
+                          <button
+                            className="admin-primary"
+                            disabled={busy || !workDirty}
+                            onClick={save}
+                          >
+                            {film.published
+                              ? savedFilms.some(
+                                  (f) => f.id === film.id && f.published,
+                                )
+                                ? "Save film changes ↗"
+                                : "Publish film ↗"
+                              : "Save film draft"}
+                          </button>
                         </>
                       )}
                       <div className="admin-editor-bottom">
@@ -839,7 +919,8 @@ export default function AdminEditor({
             )}
           </fieldset>
           <footer className="admin-note">
-            Changes go live when you save. Drafts stay private.{" "}
+            Save changes updates this section. Edits in the other section stay
+            unsaved. Drafts stay private.{" "}
             <a
               href={tab === "work" ? "/#work" : "/be-the-producer"}
               target="_blank"
