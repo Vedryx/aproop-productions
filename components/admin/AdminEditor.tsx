@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { AdminFilm, AdminProject, Content } from "@/lib/admin/schema";
 import StarButton from "./StarButton";
 import StoryEditor, { storyStepFor } from "./StoryEditor";
@@ -9,6 +9,13 @@ import { contentSchema, youtubeId } from "@/lib/admin/schema";
 
 type Selection =
   { kind: "film"; id: string } | { kind: "project"; id: string } | null;
+const filmFieldLabels: Record<string, string> = {
+  title: "Film title",
+  vid: "YouTube link or video ID",
+  client: "Client / credit",
+  award: "Award winning",
+  published: "Published on website",
+};
 function Field({
   label,
   value,
@@ -16,6 +23,7 @@ function Field({
   multiline = false,
   type = "text",
   min = 0,
+  max,
 }: {
   label: string;
   value: string | number;
@@ -23,25 +31,52 @@ function Field({
   multiline?: boolean;
   type?: string;
   min?: number;
+  /** Character limit shown as a live counter; matches the schema's max. */
+  max?: number;
 }) {
+  const id = useId();
+  const length = String(value).trim().length;
+  const over = max !== undefined && length > max;
+  const control = multiline ? (
+    <textarea
+      id={id}
+      rows={5}
+      value={value}
+      aria-invalid={over || undefined}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  ) : (
+    <input
+      id={id}
+      type={type}
+      min={min}
+      value={value}
+      aria-invalid={over || undefined}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  );
+  if (max === undefined)
+    return (
+      <label>
+        {label}
+        {control}
+      </label>
+    );
+  // The counter sits beside the label rather than inside it so the control's
+  // accessible name stays exactly the label text.
   return (
-    <label>
-      {label}
-      {multiline ? (
-        <textarea
-          rows={5}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      ) : (
-        <input
-          type={type}
-          min={min}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      )}
-    </label>
+    <div className="admin-field">
+      <div className="admin-field-head">
+        <label htmlFor={id}>{label}</label>
+        <span
+          className={`admin-chars${over ? " admin-chars-over" : ""}`}
+          aria-live="polite"
+        >
+          {length} / {max}
+        </span>
+      </div>
+      {control}
+    </div>
   );
 }
 export default function AdminEditor({
@@ -319,9 +354,14 @@ export default function AdminEditor({
           setQuery("");
           setStatusFilter("all");
         }
-        setError(
-          `${invalidFilm ? `“${invalidFilm.title}”: ` : ""}${issue.message} Your changes have not been saved.`,
-        );
+        const fieldLabel =
+          invalidFilm && typeof issue.path[4] === "string"
+            ? filmFieldLabels[issue.path[4]]
+            : undefined;
+        const where = invalidFilm
+          ? `${fieldLabel ?? "A field"} in “${invalidFilm.title || "Untitled film"}”: `
+          : "";
+        setError(`${where}${issue.message} Your changes have not been saved.`);
       }
       window.scrollTo({ top: 0 });
       return;
@@ -824,6 +864,7 @@ export default function AdminEditor({
                           <Field
                             label="Film title"
                             value={film.title}
+                            max={200}
                             onChange={(title) => editFilm({ title })}
                           />
                           <Field
@@ -834,6 +875,7 @@ export default function AdminEditor({
                           <Field
                             label="Client / credit"
                             value={film.client}
+                            max={300}
                             onChange={(client) => editFilm({ client })}
                           />
                           <label>

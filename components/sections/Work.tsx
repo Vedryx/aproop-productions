@@ -14,6 +14,7 @@ type Card = {
   num: string;
   label: string;
   title: string;
+  client: string;
   award: boolean;
 };
 
@@ -38,6 +39,7 @@ function toCard(s: Shelf, f: Film, i: number): Card {
     num: `${s.num}.${i + 1}`,
     label: s.key,
     title: f.title,
+    client: f.client?.trim() ?? "",
     award: !!f.award,
   };
 }
@@ -143,7 +145,7 @@ export default function Work({ shelfData }: { shelfData: Shelf[] }) {
             data-reveal=""
             className="relative flex h-[clamp(300px,30vw,366px)] flex-col border border-[rgba(244,239,228,.09)] bg-panel transition-all duration-500 hover:-translate-y-2 hover:border-[rgba(217,178,60,.55)] hover:shadow-[0_30px_60px_rgba(0,0,0,.5)]"
           >
-            <div className="relative h-[68%] flex-none overflow-hidden border-b border-[rgba(244,239,228,.09)] bg-ink-darker">
+            <div className="relative h-[66%] flex-none overflow-hidden border-b border-[rgba(244,239,228,.09)] bg-ink-darker">
               <Poster vid={c.vid} alt={c.label} />
 
               <button
@@ -171,9 +173,16 @@ export default function Work({ shelfData }: { shelfData: Shelf[] }) {
             </div>
 
             <div className="flex min-h-0 flex-1 items-center justify-between gap-5 overflow-hidden px-[clamp(20px,2vw,26px)] py-[clamp(18px,1.8vw,24px)]">
-              <h3 className="m-0 line-clamp-2 font-display text-[clamp(23px,1.9vw,29px)] font-medium leading-[1.34] text-cream-2">
-                {c.title}
-              </h3>
+              <div className="min-w-0">
+                <h3 className="m-0 line-clamp-2 font-display text-[clamp(23px,1.9vw,29px)] font-medium leading-[1.34] text-cream-2">
+                  {c.title}
+                </h3>
+                {c.client && (
+                  <p className="m-0 mt-1 line-clamp-1 font-body text-[11.5px] tracking-[0.05em] text-muted-3">
+                    {c.client}
+                  </p>
+                )}
+              </div>
               <div className="flex flex-none items-center">
                 <button
                   type="button"

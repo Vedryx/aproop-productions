@@ -87,6 +87,35 @@
 .studio-admin textarea {
   resize: vertical;
 }
+.admin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0 0 17px;
+}
+.admin-field-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.admin-field-head label {
+  margin: 0;
+}
+.admin-chars {
+  font-size: 11.5px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--ad-muted);
+}
+.admin-chars-over {
+  color: #9c3627;
+  font-weight: 600;
+}
+.studio-admin input[aria-invalid="true"],
+.studio-admin textarea[aria-invalid="true"] {
+  border-color: #b84934;
+}
 .studio-admin input[type="checkbox"] {
   accent-color: var(--ad-green);
   width: 18px;

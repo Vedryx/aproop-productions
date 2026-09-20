@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { randomUUID } from "node:crypto";
-import { contentSchema, youtubeId, type Content } from "../lib/admin/schema";
+import {
+  contentSchema,
+  filmSchema,
+  youtubeId,
+  type Content,
+} from "../lib/admin/schema";
 import { setFeatured } from "../lib/admin/featured";
 import { projects } from "../lib/producer";
 const content = (): Content => ({
@@ -27,6 +32,27 @@ test("normalizes video links and refuses unrelated domains", () => {
   assert.equal(
     youtubeId("https://evil.test/watch?v=1r97KROnFFM"),
     "https://evil.test/watch?v=1r97KROnFFM",
+  );
+});
+test("film length limits explain themselves and point at the field", () => {
+  const film = {
+    id: randomUUID(),
+    title: "WithAarya",
+    client: "x".repeat(301),
+    vid: "doBg0yyRo-c",
+    award: false,
+    published: true,
+  };
+  const result = filmSchema.safeParse(film);
+  assert.equal(result.success, false);
+  const issue = result.error!.issues[0];
+  assert.deepEqual(issue.path, ["client"]);
+  assert.equal(issue.message, "Keep this under 300 characters.");
+  assert.ok(filmSchema.safeParse({ ...film, client: "x".repeat(300) }).success);
+  const long = filmSchema.safeParse({ ...film, title: "t".repeat(201) });
+  assert.equal(
+    long.error!.issues[0].message,
+    "Keep this under 200 characters.",
   );
 });
 test("allows complete deletion without restoring seed content", () => {
