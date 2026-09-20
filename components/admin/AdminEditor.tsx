@@ -9,6 +9,14 @@ import { contentSchema, youtubeId } from "@/lib/admin/schema";
 
 type Selection =
   { kind: "film"; id: string } | { kind: "project"; id: string } | null;
+/** Visible labels for film fields, used when a save error names the field. */
+const filmFieldLabels: Record<string, string> = {
+  title: "Film title",
+  vid: "YouTube link or video ID",
+  client: "Client / credit",
+  award: "Award winning",
+  published: "Published on website",
+};
 function Field({
   label,
   value,
@@ -319,9 +327,14 @@ export default function AdminEditor({
           setQuery("");
           setStatusFilter("all");
         }
-        setError(
-          `${invalidFilm ? `“${invalidFilm.title}”: ` : ""}${issue.message} Your changes have not been saved.`,
-        );
+        const fieldLabel =
+          invalidFilm && typeof issue.path[4] === "string"
+            ? filmFieldLabels[issue.path[4]]
+            : undefined;
+        const where = invalidFilm
+          ? `${fieldLabel ?? "A field"} in “${invalidFilm.title || "Untitled film"}”: `
+          : "";
+        setError(`${where}${issue.message} Your changes have not been saved.`);
       }
       window.scrollTo({ top: 0 });
       return;

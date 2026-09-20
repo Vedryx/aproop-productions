@@ -1,7 +1,11 @@
 import { z } from "zod";
 
 const text = (max = 200) =>
-  z.string().trim().min(1, "This field is required.").max(max);
+  z
+    .string()
+    .trim()
+    .min(1, "This field is required.")
+    .max(max, `Keep this under ${max} characters.`);
 const money = z.number().int().min(0).max(1_000_000_000);
 export function youtubeId(value: string): string {
   const input = value.trim();
@@ -41,7 +45,7 @@ export const filmSchema = z
   .object({
     id: z.string().uuid(),
     title: text(),
-    client: z.string().trim().max(300),
+    client: z.string().trim().max(300, "Keep this under 300 characters."),
     vid: z
       .string()
       .transform(youtubeId)
