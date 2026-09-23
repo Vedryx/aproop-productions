@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { phases } from "@/lib/data";
 import Eyebrow from "@/components/ui/Eyebrow";
 
@@ -37,26 +37,48 @@ export default function Services() {
   // Icon-tabs view (mobile + tablet): which phase the tiles have selected.
   const [sel, setSel] = useState(0);
 
+  const pending = useRef(new Set<number>());
+  const frames = useRef(new Set<number>());
+  useEffect(() => {
+    const timers = pending.current;
+    const animationFrames = frames.current;
+    return () => {
+      timers.forEach((id) => window.clearTimeout(id));
+      animationFrames.forEach((id) => cancelAnimationFrame(id));
+      timers.clear();
+      animationFrames.clear();
+    };
+  }, []);
+  const later = (callback: () => void, delay: number) => {
+    const id = window.setTimeout(() => {
+      pending.current.delete(id);
+      callback();
+    }, delay);
+    pending.current.add(id);
+  };
+
   const toggle = (i: number, el: HTMLElement) => {
     const wasOpen = !!open[i];
     // Replay the arcade "press" on the button before the list expands.
     el.style.transform = "translateY(6px)";
     el.style.boxShadow = "0 0 0 0 #a8781c";
     el.style.background = "#d9a93c";
-    window.setTimeout(() => {
+    later(() => {
       el.style.transform = "translateY(0)";
       el.style.boxShadow = "0 6px 0 0 #a8781c";
       el.style.background = "#e0b040";
     }, 150);
 
     const grid = el.closest(".ap-phase")?.parentElement ?? null;
-    window.setTimeout(() => {
+    later(() => {
       setOpen((s) => ({ ...s, [i]: !wasOpen }));
       if (wasOpen || !grid) return;
-      requestAnimationFrame(() => {
+      const frame = requestAnimationFrame(() => {
+        frames.current.delete(frame);
         const target = window.scrollY + grid.getBoundingClientRect().top - 120;
         window.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
       });
+      frames.current.add(frame);
     }, 170);
   };
 

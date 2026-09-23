@@ -42,6 +42,7 @@ export default function Reveal() {
       cancelAnimationFrame(raf);
       mo.disconnect();
       io.disconnect();
+      root.classList.remove("ap-anim");
     };
   }, []);
 

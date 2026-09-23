@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { type Film, type Shelf } from "@/lib/data";
+import type { PublicFilm as Film, PublicShelf as Shelf } from "@/lib/public-content";
 import Eyebrow from "@/components/ui/Eyebrow";
 import Poster from "@/components/ui/Poster";
 import VideoModal, { type PlayTarget } from "@/components/ui/VideoModal";

@@ -77,9 +77,9 @@ Everything else (20 client logos, both logo marks) imported fine and lives in
 - `HashScroll` lands `/#section` deep links under the fixed header, re-running
   the scroll over the first second so reveal animations can't drift the target.
   That is what makes "Back to the studio" return to section 05.
-- The contact form is presentational, matching the design: submitting swaps the
-  button label and does not post anywhere yet. Wire it to an endpoint when the
-  destination is decided.
+- Contact and pitch forms send through `/api/contact` using Resend. Shared MongoDB
+  quotas, bounded requests and idempotent delivery protect the endpoint; see
+  [contact reliability](docs/CONTACT-RELIABILITY.md) for configuration and retry limits.
 - On `/be-the-producer`, the tier buttons drive the CTA, which is a `mailto:`
   with the film and amount pre-filled in the subject and body — exactly as the
   canvas specifies. No payment gateway is wired up.
@@ -91,7 +91,7 @@ Everything else (20 client logos, both logo marks) imported fine and lives in
 
 ## Studio admin
 
-Visit `/admin` to manage **Final outputs**, **Be the producer**, and its **two homepage story stars**. The existing public layout is preserved. Film and story changes are stored in MongoDB and read on each public page request; no rebuild is needed. Visitors already viewing a page see changes when they reload.
+Visit `/admin` to manage **Final outputs**, **Be the producer**, and its **two homepage story stars**. The existing public layout is preserved. Film and story changes are stored in MongoDB. Public content uses a shared data cache that is invalidated immediately after admin saves; no rebuild is needed. See [caching and authentication](docs/CACHING-AND-AUTH.md). Visitors already viewing a page see changes when they reload.
 
 ### Local setup
 
@@ -99,6 +99,7 @@ Visit `/admin` to manage **Final outputs**, **Be the producer**, and its **two h
 npm install
 npm run setup:admin
 npm run db:up
+npm run db:setup
 npm run dev
 ```
 
@@ -111,7 +112,7 @@ The setup script adds missing settings to the ignored `.env.local` file, preserv
 ### Editing
 
 - **Final outputs:** add/edit/remove films, paste YouTube links or IDs, set client credits and award badges, change categories, reorder films within a category, and publish/unpublish. Add or rename categories; remove empty ones.
-- **Be the producer:** a dedicated four-step editor (Story details → Poster → Funding → Review & publish) replaces the long side panel. Values stay in place when moving between steps, Next checks the current fields, and Save takes you to any missing or invalid field. Manage title, type, poster, alt text, synopsis, director, stage, closing label, funding goal, manually recorded progress and contribution presets. Upload JPG/PNG/WebP posters up to 4 MB or use HTTPS image URLs. Uploads are persisted in MongoDB GridFS and served from `/media/:id`.
+- **Be the producer:** a dedicated four-step editor (Story details → Poster → Funding → Review & publish) replaces the long side panel. Values stay in place when moving between steps, Next checks the current fields, and Save takes you to any missing or invalid field. Manage title, type, poster, alt text, synopsis, director, stage, closing label, funding goal, manually recorded progress and contribution presets. Upload still JPG/PNG/WebP posters up to 4 MB and 25 megapixels or use HTTPS image URLs. Uploads are decoded for validation, persisted in MongoDB GridFS and streamed from `/media/:id`. See [media delivery](docs/MEDIA-DELIVERY.md).
 - **Homepage stars:** click the star beside a saved, published story or in its review screen. Stars update the homepage immediately, with a maximum of two enforced by the server. Unstar a story to make room for another. This action preserves other unsaved edits. Unpublishing/removing a story clears its star when saved.
 - **Less typing:** select formats, production stages and existing directors, or add a custom option. Choose a closing date/month and contribution presets. Posters use an upload-first layout with optional URL and image-description controls. Search and filter published, draft or starred stories.
 - **Save changes** persists edits in the active section and publishes items marked Published. Unfinished edits in the other section remain in the editor and cannot block this save. A film marked for publication shows “Ready to publish · Unsaved” until saving succeeds; “Published” confirms saved publication. Film-specific save buttons and notices distinguish drafts from published films. The homepage shows four films per page, with category filters and pagination. Drafts can be saved with a title before all details are complete; publishing requires the complete fields. New films/stories start as drafts. Draft content never reaches public page props.
@@ -120,7 +121,7 @@ The setup script adds missing settings to the ignored `.env.local` file, preserv
 
 ### Authentication and storage
 
-Single owner account configured through server environment variables. Sessions use HS256 JWTs in HttpOnly, SameSite=Strict cookies (Secure under production), with an eight-hour expiry and server-side session records. Every admin API checks authentication. Signing out revokes the stored session, and changing credentials invalidates older tokens. Mutation routes require the configured same origin. Login attempts are limited in MongoDB to ten per fifteen-minute account-wide window; this intentionally also applies across app instances.
+Single owner account configured through server environment variables. Sessions use HS256 JWTs in HttpOnly, SameSite=Strict cookies (Secure under production), with an eight-hour expiry and server-side session records. Every admin API checks authentication. Signing out revokes the stored session, and changing credentials invalidates older tokens. Mutation routes require the configured same origin. Login attempts are limited in MongoDB to ten per fifteen-minute account-wide window, with a five-attempt cap for each trusted client; these limits apply across app instances. Password comparisons run asynchronously and sessions have a unique token lookup index.
 
 The site requires MongoDB at runtime. The local container has no database authentication and is loopback-only; do not expose it publicly. For production, set `MONGODB_URI` to a persistent authenticated MongoDB service, configure backups/access restrictions, use the HTTPS `APP_ORIGIN`, and supply separate admin credentials/JWT secret. Never point a deployed site at the local container. GridFS content and the database must be backed up together. Uploaded images are public once their URL is known; unused uploads are retained, not automatically deleted.
 
@@ -129,11 +130,15 @@ The initial producer funding totals were copied from the previous static site, n
 ### Verification
 
 ```sh
-npm run test
-npm run lint
-npm run build
 npx playwright install chromium
-npm run test:e2e
+npm run verify
 ```
 
 Run browser tests after `npm run build`, with the local MongoDB container running. Playwright starts a separate production server at `http://127.0.0.1:3101`, generates test-only credentials, and uses a new `aproop_e2e_*` database that it deletes after the run. Your review server, credentials and content are not used. Tests exercise login, film/category/story CRUD, the four-step editor, validation, drafts, immediate homepage stars and their two-story limit, conflict rejection, uploads, desktop/tablet/mobile layouts, forged/expired sessions, CSRF rejection and logout revocation. Screenshots go to ignored `artifacts/` and failures to `test-results/`.
+
+## Technical optimization results
+
+See [operations and six-round results](docs/OPERATIONS-AND-RESULTS.md) for the
+implemented improvements, measured comparisons and release checks,
+[editor and lifecycle](docs/EDITOR-AND-LIFECYCLE.md) for browser/editor changes,
+and [verification](docs/VERIFICATION.md) for the complete local test record.

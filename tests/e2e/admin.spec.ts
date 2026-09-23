@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { authenticatedApi } from "./helpers";
 import { randomUUID } from "node:crypto";
 import type { Content } from "../../lib/admin/schema";
@@ -108,7 +108,7 @@ test("admin CRUD, publication, featured selection, persistence and authenticatio
     const upload = await api.post("/api/admin/uploads", {
       headers: { ...headers, "Content-Type": "image/png" },
       data: Buffer.from(
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aOZsAAAAASUVORK5CYII=",
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAADUlEQVQImWP4////fwAJ+wP9CNHoHgAAAABJRU5ErkJggg==",
         "base64",
       ),
     });
@@ -230,7 +230,7 @@ test("story editor and immediate homepage stars publish the selected story", asy
       name: "poster.png",
       mimeType: "image/png",
       buffer: Buffer.from(
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aOZsAAAAASUVORK5CYII=",
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAADUlEQVQImWP4////fwAJ+wP9CNHoHgAAAABJRU5ErkJggg==",
         "base64",
       ),
     });

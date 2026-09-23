@@ -1,0 +1,18 @@
+/* Screenshot-only: show the final reveal state without moving the fixed header. */
+/* Replace only moving video pixels, preserving overlaid navigation and controls. */
+section#top {
+  background-image: url("/uploads/hero-poster.jpg");
+  background-position: center;
+  background-size: cover;
+}
+video {
+  visibility: hidden !important;
+}
+
+[data-reveal],
+[data-dot],
+[data-stroke] {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}

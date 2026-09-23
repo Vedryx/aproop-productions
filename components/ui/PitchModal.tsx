@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { lockBodyScroll } from "@/lib/scroll-lock";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useEnquiry } from "@/hooks/useEnquiry";
 import Honeypot from "@/components/ui/Honeypot";
@@ -29,10 +30,10 @@ export default function PitchModal({
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
+    const unlock = lockBodyScroll();
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      unlock();
     };
   }, [open, onClose]);
 

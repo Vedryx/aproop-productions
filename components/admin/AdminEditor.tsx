@@ -1,8 +1,10 @@
 "use client";
+import { adminRequest } from "@/lib/admin/request";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { AdminFilm, AdminProject, Content } from "@/lib/admin/schema";
+import { patchFilm, patchProject, indexSavedItems } from "@/lib/admin/editor-state";
 import StarButton from "./StarButton";
 import StoryEditor, { storyStepFor } from "./StoryEditor";
 import { contentSchema, youtubeId } from "@/lib/admin/schema";
@@ -61,7 +63,7 @@ export default function AdminEditor({
 }) {
   const router = useRouter();
   const [content, setContent] = useState(initial);
-  const [saved, setSaved] = useState(JSON.stringify(initial));
+  const [savedContent, setSaved] = useState(initial);
   const [tab, setTab] = useState<"work" | "stories">("work");
   const [selection, setSelection] = useState<Selection>(null);
   const [storyStep, setStoryStep] = useState(0);
@@ -71,19 +73,20 @@ export default function AdminEditor({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const dirty = JSON.stringify(content) !== saved;
-  const savedContent: Content = JSON.parse(saved);
-  const workDirty =
-    JSON.stringify(content.shelves) !== JSON.stringify(savedContent.shelves);
-  const storiesDirty =
-    JSON.stringify(content.projects) !== JSON.stringify(savedContent.projects);
+  const savedWork = useMemo(() => JSON.stringify(savedContent.shelves), [savedContent.shelves]);
+  const savedStories = useMemo(() => JSON.stringify(savedContent.projects), [savedContent.projects]);
+  const currentWork = useMemo(() => JSON.stringify(content.shelves), [content.shelves]);
+  const currentStories = useMemo(() => JSON.stringify(content.projects), [content.projects]);
+  const workDirty = currentWork !== savedWork;
+  const storiesDirty = currentStories !== savedStories;
+  const dirty = workDirty || storiesDirty;
   const sectionDirty = tab === "work" ? workDirty : storiesDirty;
-  const savedFilms = savedContent.shelves.flatMap((s) => s.films);
+  const savedFilms = useMemo(() => savedContent.shelves.flatMap((s) => s.films), [savedContent.shelves]);
+  const savedItems = useMemo(() => indexSavedItems(savedContent), [savedContent]);
   function publicationBadge(item: AdminFilm | AdminProject) {
-    const persisted = [...savedFilms, ...savedContent.projects].find(
-      (p) => p.id === item.id,
-    );
-    const changed = JSON.stringify(item) !== JSON.stringify(persisted);
+    const entry = savedItems.get(item.id);
+    const persisted = entry?.item;
+    const changed = JSON.stringify(item) !== entry?.signature;
     const status =
       item.published !== !!persisted?.published
         ? item.published
@@ -125,13 +128,11 @@ export default function AdminEditor({
     setError("");
     setNotice("");
     try {
-      const response = await fetch("/api/admin/content", {
+      const data = await adminRequest<Content>("/api/admin/content", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, featured, revision: content.revision }),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
       const persisted: Content = data;
       const slot = persisted.projects.find((p) => p.id === id)!.homepageSlot;
       // A star saves just the homepage flag, preserving any unfinished form edits.
@@ -142,7 +143,7 @@ export default function AdminEditor({
           p.id === id ? { ...p, homepageSlot: slot } : p,
         ),
       }));
-      setSaved(JSON.stringify(persisted));
+      setSaved(persisted);
       setNotice(
         featured
           ? `“${target.title}” is now on the homepage.`
@@ -158,6 +159,7 @@ export default function AdminEditor({
   }
 
   useEffect(() => {
+    if (!dirty) return;
     const handler = (event: BeforeUnloadEvent) => {
       if (dirty) {
         event.preventDefault();
@@ -177,9 +179,9 @@ export default function AdminEditor({
     setError("");
     setStoryErrors({});
   };
-  const films = content.shelves.flatMap((s, si) =>
+  const films = useMemo(() => content.shelves.flatMap((s, si) =>
     s.films.map((f) => ({ ...f, si, category: s.key })),
-  );
+  ), [content.shelves]);
   const film =
     selection?.kind === "film"
       ? films.find((f) => f.id === selection.id)
@@ -188,26 +190,21 @@ export default function AdminEditor({
     selection?.kind === "project"
       ? content.projects.find((p) => p.id === selection.id)
       : undefined;
-  const editFilm = (patch: Partial<AdminFilm>) =>
-    update((draft) => {
-      const f = draft.shelves
-        .flatMap((s) => s.films)
-        .find((f) => f.id === film?.id);
-      if (f) Object.assign(f, patch);
-    });
-  const editProject = (patch: Partial<AdminProject>) =>
-    update((draft) => {
-      const p = draft.projects.find((p) => p.id === project?.id);
-      if (p) {
-        if (
-          patch.title !== undefined &&
-          (!p.ph || p.ph === `${p.title} — poster`)
-        )
-          p.ph = `${patch.title} — poster`;
-        Object.assign(p, patch);
-        if (!p.published) p.homepageSlot = 0;
-      }
-    });
+  const clearFeedback = () => {
+    setNotice("");
+    setError("");
+    setStoryErrors({});
+  };
+  const editFilm = (patch: Partial<AdminFilm>) => {
+    if (!film) return;
+    setContent((previous) => patchFilm(previous, film.id, patch));
+    clearFeedback();
+  };
+  const editProject = (patch: Partial<AdminProject>) => {
+    if (!project) return;
+    setContent((previous) => patchProject(previous, project.id, patch));
+    clearFeedback();
+  };
   const addFilm = () => {
     const id = crypto.randomUUID();
     update((d) => {
@@ -343,13 +340,11 @@ export default function AdminEditor({
     setError("");
     setNotice("");
     try {
-      const response = await fetch("/api/admin/content", {
+      const data = await adminRequest<Content>("/api/admin/content", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(parsed.data),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
       setContent((previous) => ({
         ...previous,
         revision: data.revision,
@@ -357,7 +352,7 @@ export default function AdminEditor({
           ? { shelves: data.shelves }
           : { projects: data.projects }),
       }));
-      setSaved(JSON.stringify(data));
+      setSaved(data);
       const savedFilm = film
         ? data.shelves
             .flatMap((s: Content["shelves"][number]) => s.films)
@@ -389,13 +384,11 @@ export default function AdminEditor({
     setBusy(true);
     setError("");
     try {
-      const response = await fetch("/api/admin/uploads", {
+      const data = await adminRequest<{ url: string }>("/api/admin/uploads", {
         method: "POST",
         headers: { "Content-Type": file.type },
         body: file,
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
       editProject({
         poster: data.url,
         ph: project.ph || `${project.title} — poster`,
@@ -454,12 +447,10 @@ export default function AdminEditor({
                 return;
               setBusy(true);
               try {
-                const response = await fetch("/api/admin/logout", {
+                await adminRequest("/api/admin/logout", {
                   method: "POST",
                 });
-                if (!response.ok)
-                  throw new Error("Sign out failed. Try again.");
-                setSaved(JSON.stringify(content));
+                setSaved(content);
                 router.replace("/admin/login");
                 router.refresh();
               } catch (error) {

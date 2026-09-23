@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { lockBodyScroll } from "@/lib/scroll-lock";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 export type PlayTarget = { id: string; title: string; single?: boolean } | null;
@@ -21,10 +22,10 @@ export default function VideoModal({
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
+    const unlock = lockBodyScroll();
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      unlock();
     };
   }, [play, onClose]);
 

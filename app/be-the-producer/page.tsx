@@ -1,4 +1,6 @@
 import { getPublicContent } from "@/lib/admin/content";
+import { publicProjects } from "@/lib/public-content";
+import { connection } from "next/server";
 import type { Metadata } from "next";
 import Footer from "@/components/layout/Footer";
 import ProducerBody from "@/components/sections/ProducerBody";
@@ -19,9 +21,8 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
-
 export default async function BeTheProducerPage() {
+  await connection();
   const { projects } = await getPublicContent();
   return (
     <div className="min-h-screen bg-ink font-body text-cream">
@@ -44,7 +45,7 @@ export default async function BeTheProducerPage() {
         </div>
       </section>
 
-      <ProducerBody projects={projects} />
+      <ProducerBody projects={publicProjects(projects)} />
       <Footer />
     </div>
   );

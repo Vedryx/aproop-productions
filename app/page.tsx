@@ -1,4 +1,6 @@
 import { getPublicContent } from "@/lib/admin/content";
+import { publicShelves } from "@/lib/public-content";
+import { connection } from "next/server";
 import About from "@/components/sections/About";
 import Brands from "@/components/sections/Brands";
 import Contact from "@/components/sections/Contact";
@@ -14,9 +16,8 @@ import Reveal from "@/components/system/Reveal";
 import Services from "@/components/sections/Services";
 import Work from "@/components/sections/Work";
 
-export const dynamic = "force-dynamic";
-
 export default async function Home() {
+  await connection();
   const content = await getPublicContent();
   return (
     <div className="relative min-h-screen bg-ink font-body text-cream">
@@ -29,7 +30,7 @@ export default async function Home() {
         jingles
       </h1>
       <Hero />
-      <Work shelfData={content.shelves} />
+      <Work shelfData={publicShelves(content.shelves)} />
       <Brands />
       <Services />
       <About />

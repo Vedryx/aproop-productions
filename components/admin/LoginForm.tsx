@@ -1,4 +1,5 @@
 "use client";
+import { adminRequest } from "@/lib/admin/request";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -22,7 +23,7 @@ export default function LoginForm() {
             setError("");
             const form = new FormData(event.currentTarget);
             try {
-              const result = await fetch("/api/admin/login", {
+              await adminRequest("/api/admin/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -30,8 +31,6 @@ export default function LoginForm() {
                   password: form.get("password"),
                 }),
               });
-              const data = await result.json();
-              if (!result.ok) throw new Error(data.error);
               router.replace("/admin");
               router.refresh();
             } catch (error) {
