@@ -58,8 +58,16 @@ export const shelfData: Shelf[] = [
         vid: "-4TP9VvD_S4",
         client: "Hotel Suraj, Parner",
       },
-      { title: "AISSMS COE TVC", vid: "BxTlQoN30Mg", client: "AISSMS COE · 2023" },
-      { title: "AISSMS IOIT TVC", vid: "5h9p-bMvJKo", client: "AISSMS IOIT · 2023" },
+      {
+        title: "AISSMS COE TVC",
+        vid: "BxTlQoN30Mg",
+        client: "AISSMS COE · 2023",
+      },
+      {
+        title: "AISSMS IOIT TVC",
+        vid: "5h9p-bMvJKo",
+        client: "AISSMS IOIT · 2023",
+      },
     ],
   },
   {
@@ -144,9 +152,21 @@ export const shelfData: Shelf[] = [
         vid: "T_YM7aGBYWQ",
         client: "Maharashtra Forest Dept.",
       },
-      { title: "एकटे फिरू नका", vid: "oZlfjZlE1vo", client: "Maharashtra Forest Dept." },
-      { title: "अफवा पसरवू नका", vid: "msoO6iKop-c", client: "Maharashtra Forest Dept." },
-      { title: "वनवणवे रोखूया", vid: "4ZG1sCJrjAM", client: "Maharashtra Forest Dept." },
+      {
+        title: "एकटे फिरू नका",
+        vid: "oZlfjZlE1vo",
+        client: "Maharashtra Forest Dept.",
+      },
+      {
+        title: "अफवा पसरवू नका",
+        vid: "msoO6iKop-c",
+        client: "Maharashtra Forest Dept.",
+      },
+      {
+        title: "वनवणवे रोखूया",
+        vid: "4ZG1sCJrjAM",
+        client: "Maharashtra Forest Dept.",
+      },
       {
         title: "उघड्यावर झोपू नका",
         vid: "xLi_DXv19Ng",
@@ -211,7 +231,7 @@ export const faqData = [
   },
   {
     q: "Do you handle the entire production process?",
-    a: "Yes.\nFrom pre-production, scripting and planning to casting, locations, crew, shooting, editing, sound, colour grading, graphics, music and mixing to final delivery — we can handle the entire journey. Of course, this is a professionally ‘crewzy’ thing!",
+    a: "Yes.\nFrom pre-production, scripting and planning to casting, locations, crew, shooting, editing, sound, colour grading, graphics, music and mixing to final delivery. we can handle the entire journey. Of course, this is a professionally ‘crewzy’ thing!",
   },
   {
     q: "What kind of films does Aproop make?",
@@ -223,11 +243,11 @@ export const faqData = [
   },
   {
     q: "Do you work with small budgets?",
-    a: "Why not?\nA smaller budget doesn't mean we can't make something good. But it does mean we need to be clear about what is possible and what kind of output you're expecting.\nA big-budget idea and a small-budget execution are not always the same thing. The good news? We can help you figure out where to scale, where to simplify and where it’s worth spending.\nSo, come to us with your budget and your expectations. We'll have an honest conversation and see how best we can make it work.\nAnd yes, just like everything else in life — Jitne mein jitna mil sakta hai, utna hi milega. But within that, we'll always try to find the smartest and most creative way forward.",
+    a: "Why not?\nA smaller budget doesn't mean we can't make something good. But it does mean we need to be clear about what is possible and what kind of output you're expecting.\nA big-budget idea and a small-budget execution are not always the same thing. The good news? We can help you figure out where to scale, where to simplify and where it’s worth spending.\nSo, come to us with your budget and your expectations. We'll have an honest conversation and see how best we can make it work.\nAnd yes, just like everything else in life, Jitne mein jitna milta hai utna milega. But within that, we'll always try to find the smartest and most creative way forward.",
   },
   {
     q: "What if I only have an idea and no script?",
-    a: "Perfect. That's how many good films begin.\nYou can come to us with a complete script, a rough concept, a reference board or simply an idea that you can't stop thinking about.\nAnd if you need a little creative push, our writing department is highly appreciated by our clients — so we can also help you explore some fresh ideas, develop the concept and shape the story. From there, we can write the script and take it all the way through production.\nBasically, bring us the spark. Our team will help build the fire.",
+    a: "Perfect. That's how many good films begin.\nYou can come to us with a complete script, a rough concept, a reference board or simply an idea that you can't stop thinking about.\nAnd if you need a little creative push, our writing department is highly appreciated by our clients, so we can also help you explore some fresh ideas, develop the concept and shape the story. From there, we can write the script and take it all the way through production.\nBasically, bring us the spark. Our team will help build the fire.",
   },
   {
     q: "So, I want to inquire about an ad film or documentary. What happens next?",
@@ -297,10 +317,29 @@ export const phases = [
 ];
 
 export const logoHeights = [
-  48, 76, 76, 61, 48, 76, 75, 76, 76, 76, 59, 76, 65, 76, 76, 75, 64, 75, 54, 76,
+  48, 76, 76, 61, 48, 76, 75, 76, 76, 76, 59, 76, 65, 76, 76, 75, 64, 75, 54,
+  76,
 ];
 
 export const logoFiles = [
-  "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
-  "11", "12", "13", "14", "15", "16", "18", "19", "20", "21",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "13",
+  "14",
+  "15",
+  "16",
+  "18",
+  "19",
+  "20",
+  "21",
 ];
