@@ -135,15 +135,15 @@ export default function Work({ shelfData }: { shelfData: Shelf[] }) {
         id="work-grid"
         role="tabpanel"
         aria-labelledby={`work-tab-${cats.indexOf(cat)}`}
-        className="ap-wgrid grid auto-rows-fr grid-cols-2 items-start justify-items-stretch gap-[clamp(14px,1.7vh,24px)]"
+        className="ap-wgrid grid auto-rows-fr grid-cols-2 items-stretch justify-items-stretch gap-[clamp(14px,1.7vh,24px)]"
       >
         {visible.map((c) => (
           <article
             key={c.key}
             data-reveal=""
-            className="relative flex h-[clamp(300px,30vw,366px)] flex-col border border-[rgba(244,239,228,.09)] bg-panel transition-all duration-500 hover:-translate-y-2 hover:border-[rgba(217,178,60,.55)] hover:shadow-[0_30px_60px_rgba(0,0,0,.5)]"
+            className="relative flex h-full flex-col border border-[rgba(244,239,228,.09)] bg-panel transition-all duration-500 hover:-translate-y-2 hover:border-[rgba(217,178,60,.55)] hover:shadow-[0_30px_60px_rgba(0,0,0,.5)]"
           >
-            <div className="relative h-[68%] flex-none overflow-hidden border-b border-[rgba(244,239,228,.09)] bg-ink-darker">
+            <div className="relative aspect-[16/9] w-full flex-none overflow-hidden border-b border-[rgba(244,239,228,.09)] bg-ink-darker">
               <Poster vid={c.vid} alt={c.label} />
 
               <button
@@ -170,7 +170,7 @@ export default function Work({ shelfData }: { shelfData: Shelf[] }) {
               )}
             </div>
 
-            <div className="flex min-h-0 flex-1 items-center justify-between gap-5 overflow-hidden px-[clamp(20px,2vw,26px)] py-[clamp(18px,1.8vw,24px)]">
+            <div className="flex min-h-0 flex-1 items-center justify-between gap-5 overflow-hidden px-[clamp(20px,2vw,26px)] py-[clamp(12px,1.1vw,16px)]">
               <h3 className="m-0 line-clamp-2 font-display text-[clamp(23px,1.9vw,29px)] font-medium leading-[1.34] text-cream-2">
                 {c.title}
               </h3>
