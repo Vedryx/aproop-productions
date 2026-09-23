@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { logoFiles, logoHeights, testimonials } from "@/lib/data";
 
 function LogoRow({ hidden = false }: { hidden?: boolean }) {
@@ -26,16 +26,7 @@ function LogoRow({ hidden = false }: { hidden?: boolean }) {
 export default function Brands() {
   const [q, setQ] = useState(0);
   const [dir, setDir] = useState<"r" | "l">("r");
-  const [h, setH] = useState(0);
-  const box = useRef<HTMLDivElement>(null);
   const timer = useRef<number | null>(null);
-
-  const measure = useCallback(() => {
-    const el = box.current;
-    if (!el) return;
-    const next = el.offsetHeight;
-    if (next) setH((prev) => (prev === next ? prev : next));
-  }, []);
 
   const startAuto = useCallback(() => {
     if (timer.current) window.clearInterval(timer.current);
@@ -61,30 +52,6 @@ export default function Brands() {
     };
   }, [startAuto]);
 
-  useLayoutEffect(() => {
-    measure();
-    const raf = requestAnimationFrame(measure);
-    const t = window.setTimeout(measure, 90);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.clearTimeout(t);
-    };
-  }, [q, measure]);
-
-  useEffect(() => {
-    const el = box.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => requestAnimationFrame(measure));
-    ro.observe(el);
-    window.addEventListener("resize", measure);
-    if (document.fonts?.ready) document.fonts.ready.then(measure);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", measure);
-    };
-  }, [measure]);
-
-  const t = testimonials[q];
   const anim = `${dir}${q % 2 ? "a" : "b"}`;
 
   const arrow =
@@ -138,25 +105,29 @@ export default function Brands() {
 
         <div className="font-display text-[80px] leading-[.5] text-gold">“</div>
 
-        <div
-          className="overflow-hidden transition-[height] duration-[550ms] [transition-timing-function:cubic-bezier(.25,.8,.25,1)]"
-          style={{ height: h ? `${h}px` : "auto" }}
-        >
-          <div
-            ref={box}
-            data-anim={anim}
-            className="flex flex-col gap-3.5 pb-1 pt-[26px]"
-          >
-            <p className="m-0 font-display text-[clamp(21px,2.1vw,33px)] font-normal italic leading-[1.45] text-cream-2 [text-wrap:pretty]">
-              {t.text}
-            </p>
-            <div className="mt-[18px] font-display text-[clamp(20px,1.7vw,25px)] text-cream-2">
-              {t.who}
+        {/* Every quote sits in the same grid cell, so the box is always as tall
+            as the longest one and the page never shifts as they rotate. */}
+        <div className="grid overflow-hidden">
+          {testimonials.map((t, i) => (
+            <div
+              key={i}
+              data-anim={i === q ? anim : undefined}
+              aria-hidden={i === q ? undefined : true}
+              className={`col-start-1 row-start-1 flex flex-col gap-3.5 pb-1 pt-[26px] ${
+                i === q ? "" : "invisible"
+              }`}
+            >
+              <p className="m-0 font-display text-[clamp(21px,2.1vw,33px)] font-normal italic leading-[1.45] text-cream-2 [text-wrap:pretty]">
+                {t.text}
+              </p>
+              <div className="mt-[18px] font-display text-[clamp(20px,1.7vw,25px)] text-cream-2">
+                {t.who}
+              </div>
+              <div className="-mt-1 text-[11px] uppercase leading-[1.7] tracking-[0.22em] text-gold">
+                {t.org}
+              </div>
             </div>
-            <div className="-mt-1 text-[11px] uppercase leading-[1.7] tracking-[0.22em] text-gold">
-              {t.org}
-            </div>
-          </div>
+          ))}
         </div>
 
         <div className="mt-[22px] flex justify-center gap-1">
