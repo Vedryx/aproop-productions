@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { AdminProject } from "@/lib/admin/schema";
+import type { FundingView } from "@/lib/payments/model";
+import "@/components/payments/payments.css";
 import PitchModal from "@/components/ui/PitchModal";
 import ProjectCard from "@/components/ui/ProjectCard";
 
@@ -11,6 +13,26 @@ export default function ProducerBody({
   projects: AdminProject[];
 }) {
   const [pitch, setPitch] = useState(false);
+  const [funding, setFunding] = useState<FundingView[]>([]);
+  useEffect(() => {
+    let active = true;
+    const refresh = async () => {
+      try {
+        const r = await fetch("/api/funding", { cache: "no-store" });
+        if (r.ok && active) setFunding(await r.json());
+      } catch {
+        /* Server validates availability again at checkout. */
+      }
+    };
+    void refresh();
+    const timer = setInterval(refresh, 15000);
+    window.addEventListener("focus", refresh);
+    return () => {
+      active = false;
+      clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
 
   return (
     <>
@@ -24,7 +46,11 @@ export default function ProducerBody({
           </p>
         )}
         {projects.map((p) => (
-          <ProjectCard key={p.id} project={p} />
+          <ProjectCard
+            key={p.id}
+            project={p}
+            funding={funding.find((f) => f.projectId === p.id)}
+          />
         ))}
 
         <p className="m-0 text-[clamp(15px,1.2vw,17px)] font-light leading-[1.75] text-muted">

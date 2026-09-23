@@ -10,7 +10,7 @@ export class HttpError extends Error {
 export function sameOrigin(request: Request) {
   const expected = process.env.APP_ORIGIN || new URL(request.url).origin;
   if (request.headers.get("origin") !== expected)
-    throw new HttpError("This request must come from the admin website.", 403);
+    throw new HttpError("This request must come from this website.", 403);
 }
 export async function readJson(
   request: Request,

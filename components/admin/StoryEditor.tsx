@@ -25,7 +25,16 @@ export const STORY_STEPS = [
 const FIELDS = [
   ["title", "kind", "synopsis", "director", "stage", "closes"],
   ["poster", "ph"],
-  ["need", "raised", "backers", "options"],
+  [
+    "need",
+    "raised",
+    "backers",
+    "options",
+    "fundingState",
+    "fundingTerms",
+    "minContribution",
+    "maxContribution",
+  ],
   ["published", "homepageSlot"],
 ];
 export function storyStepFor(field: string) {
@@ -297,6 +306,69 @@ export default function StoryEditor({
           <div className="story-funding-grid">
             <div>
               {field("need", "Funding goal (₹)", false, "number", 1)}
+              <div className="payment-funding-options">
+                <label>
+                  Online contributions
+                  <select
+                    value={p.fundingState || "setup"}
+                    onChange={(e) =>
+                      onChange({
+                        fundingState: e.target
+                          .value as AdminProject["fundingState"],
+                      })
+                    }
+                  >
+                    {(!p.fundingState || p.fundingState === "setup") && (
+                      <option value="setup">Not enabled</option>
+                    )}
+                    <option value="open">Open for contributions</option>
+                    <option value="paused">Paused</option>
+                    <option value="closed">Closed</option>
+                  </select>
+                </label>
+                {p.fundingState && p.fundingState !== "setup" && (
+                  <>
+                    <label>
+                      Minimum contribution (₹)
+                      <input
+                        type="number"
+                        min={1}
+                        value={p.minContribution ?? 100}
+                        onChange={(e) =>
+                          onChange({ minContribution: Number(e.target.value) })
+                        }
+                      />
+                    </label>
+                    <label>
+                      Maximum contribution (₹)
+                      <input
+                        type="number"
+                        min={1}
+                        value={p.maxContribution ?? 200000}
+                        onChange={(e) =>
+                          onChange({ maxContribution: Number(e.target.value) })
+                        }
+                      />
+                    </label>
+                    <label>
+                      Contribution and refund terms
+                      <textarea
+                        value={p.fundingTerms || ""}
+                        maxLength={6000}
+                        onChange={(e) =>
+                          onChange({ fundingTerms: e.target.value })
+                        }
+                        placeholder="Explain the credits/rewards, cancellation and missed-goal policy, and how contributors can contact you."
+                      />
+                    </label>
+                    <p className="admin-help">
+                      The closing date is interpreted in India time. Fully
+                      funded projects stop accepting payments automatically.
+                      Refunds do not automatically reopen them.
+                    </p>
+                  </>
+                )}
+              </div>
               <label className="contribution-preset">
                 Contribution preset
                 <select
@@ -385,13 +457,25 @@ export default function StoryEditor({
             </div>
             <div className="story-recorded">
               <p className="admin-kicker">PROGRESS SO FAR</p>
-              <p>Only record contributions you have already received.</p>
-              {field("raised", "Raised so far (₹)", false, "number")}
-              {field("backers", "Producer count", false, "number")}
-              <p className="admin-help">
-                These figures are entered manually. Verify the original site’s
-                figures before publishing.
-              </p>
+              {!p.fundingState || p.fundingState === "setup" ? (
+                <>
+                  <p>
+                    Confirm these existing figures before enabling real
+                    payments.
+                  </p>
+                  {field("raised", "Raised so far (₹)", false, "number")}
+                  {field("backers", "Producer count", false, "number")}
+                </>
+              ) : (
+                <p>
+                  Online payment totals are calculated from confirmed payments
+                  and refunds. Opening balances cannot be edited after
+                  fundraising starts.
+                </p>
+              )}
+              <a href="/admin/contributions">
+                View contributions & verified totals ↗
+              </a>
             </div>
           </div>
         )}

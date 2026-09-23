@@ -6,3 +6,4 @@ playwright-report/
 node_modules/
 .next/
 .git/
+tests/

@@ -9,10 +9,11 @@
     "lint": "eslint",
     "assets": "bash scripts/import-assets.sh",
     "setup:admin": "node scripts/setup-admin.mjs",
-    "db:up": "docker compose up -d",
+    "db:up": "docker compose up -d --wait && node scripts/init-local-db.mjs",
     "db:stop": "docker compose stop",
     "test": "tsx --test tests/schema.test.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:payments": "node --conditions=react-server --import tsx --test tests/payments.test.ts"
   },
   "dependencies": {
     "jose": "^6.2.12",

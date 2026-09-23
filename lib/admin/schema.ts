@@ -105,6 +105,10 @@ export const projectSchema = z
     closes: z.string().trim().max(100),
     need: money.min(1),
     raised: money,
+    fundingState: z.enum(["setup", "open", "paused", "closed"]).optional(),
+    minContribution: money.min(1).optional(),
+    maxContribution: money.min(1).optional(),
+    fundingTerms: z.string().trim().max(6000).optional(),
     backers: z.number().int().min(0).max(10_000_000),
     options: z
       .array(money.min(1))

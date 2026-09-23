@@ -1,6 +1,7 @@
 services:
   mongodb:
     image: mongo:8.0
+    command: ["mongod", "--replSet", "aproop-rs", "--bind_ip_all"]
     ports:
       - "127.0.0.1:27019:27017"
     volumes:

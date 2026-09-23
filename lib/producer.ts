@@ -15,12 +15,7 @@ export type Project = {
 
 /** Indian digit grouping: 8,00,000 rather than 800,000. */
 export function fmtINR(n: number): string {
-  const s = String(n);
-  const last = s.slice(-3);
-  const rest = s.slice(0, -3);
-  return (
-    "₹" + (rest ? rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + "," : "") + last
-  );
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n);
 }
 
 export const projects: Project[] = [

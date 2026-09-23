@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import "@/components/payments/payments.css";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { AdminFilm, AdminProject, Content } from "@/lib/admin/schema";
@@ -439,6 +440,7 @@ export default function AdminEditor({
             </button>
           ))}
         </nav>
+        <a href="/admin/contributions" style={{ padding: "16px", display: "block" }}>Contributions & payments ↗</a>
         <div className="admin-sidebar-footer">
           <p>{email}</p>
           <a href="/" target="_blank" rel="noreferrer">

@@ -21,8 +21,8 @@ Posters are limited to 4 MiB on both client and server to stay below Vercel's 4.
 4. Verify the canonical domain, admin login, protected endpoints, original public content and image delivery after promotion.
 5. Keep the previous production deployment ID for `vercel rollback` if live verification fails.
 
-An empty database imports the original source content once. Local trial stories and local sessions are not copied. Cashfree remains planned; contribution buttons still initiate enquiries.
+An empty database imports the original source content once. Local trial stories and local sessions are not copied. Cashfree is implemented on the local payment branch. It remains disabled until configured and has not been released. See [Cashfree setup and verification](CASHFREE-PLAN.md). Local payment testing must use a separate sandbox database.
 
 Before later automatic releases, merge the reviewed admin branch into the repository's configured production branch (`main`). A manual CLI release does not update Git's production branch.
 
-Backups must cover `site_content` and both GridFS collections (`media.files` and `media.chunks`). Configure Atlas backups for the chosen cluster tier; maintain an export before data migrations. Code rollback does not roll back database content.
+Backups must also cover `funding_campaigns`, `contributions`, `payment_events`, and `payment_refunds` once payments are enabled. Backups must cover `site_content` and both GridFS collections (`media.files` and `media.chunks`). Configure Atlas backups for the chosen cluster tier; maintain an export before data migrations. Code rollback does not roll back database content.

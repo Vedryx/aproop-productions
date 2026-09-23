@@ -4,7 +4,7 @@ import { MongoClient } from "mongodb";
 const globalDb = globalThis as typeof globalThis & {
   aproopMongo?: Promise<MongoClient>;
 };
-export async function database() {
+export async function mongoClient() {
   const uri = process.env.MONGODB_URI;
   if (!uri) throw new Error("MONGODB_URI is not configured.");
   if (!globalDb.aproopMongo) {
@@ -18,5 +18,9 @@ export async function database() {
         throw error;
       });
   }
-  return (await globalDb.aproopMongo).db(process.env.MONGODB_DB || "aproop");
+  return await globalDb.aproopMongo;
+}
+
+export async function database() {
+  return (await mongoClient()).db(process.env.MONGODB_DB || "aproop");
 }

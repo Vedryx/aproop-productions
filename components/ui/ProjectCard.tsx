@@ -4,29 +4,48 @@ import { useState } from "react";
 import { fmtINR, formatClosingDate } from "@/lib/producer";
 import type { AdminProject } from "@/lib/admin/schema";
 import SafeImg from "@/components/ui/SafeImg";
+import type { FundingView } from "@/lib/payments/model";
+import ContributionForm from "@/components/payments/ContributionForm";
 
 const META_LABEL =
   "mb-1.5 text-[11px] uppercase tracking-[0.22em] text-muted-3";
 const META_VALUE = "text-sm text-muted-2";
 const PANEL_LABEL = "mb-2 text-[11px] uppercase tracking-[0.22em] text-muted";
 
-export default function ProjectCard({ project: p }: { project: AdminProject }) {
-  // The design opens on the second tier (₹10,000) and seeds Custom at ₹25,000.
-  const [pick, setPick] = useState(Math.min(1, p.options.length - 1));
-  const [custom, setCustom] = useState(25000);
-
-  const customOpen = pick === p.options.length;
-  const amount = customOpen ? custom : p.options[pick];
+export default function ProjectCard({
+  project: original,
+  funding,
+}: {
+  project: AdminProject;
+  funding?: FundingView;
+}) {
+  const p = {
+    ...original,
+    need: funding ? funding.goalPaise / 100 : original.need,
+    raised: funding ? funding.raisedPaise / 100 : original.raised,
+    backers: funding?.backers ?? original.backers,
+  };
+  const [amount, setAmount] = useState(
+    p.options[Math.min(1, p.options.length - 1)],
+  );
+  const [customOpen, setCustomOpen] = useState(false);
+  const [checkout, setCheckout] = useState(false);
   const pct = Math.min(100, Math.round((p.raised / p.need) * 100));
-  const tiers = [...p.options.map(fmtINR), "Custom"];
-
-  const subject = `Producing “${p.title}” — ${fmtINR(amount)}`;
-  const body = `Hi Aproop team,\n\nI'd like to contribute ${fmtINR(
-    amount,
-  )} to “${p.title}”. Please share the payment details and next steps.\n\nName:\nPhone:`;
-  const payHref = `mailto:aproop.production22@gmail.com?subject=${encodeURIComponent(
-    subject,
-  )}&body=${encodeURIComponent(body)}`;
+  const maximum = (funding?.maxPaise ?? 0) / 100;
+  const minimum = (funding?.minPaise ?? 10000) / 100;
+  const validAmount =
+    Number.isFinite(amount) &&
+    Math.abs(amount * 100 - Math.round(amount * 100)) < 0.000001 &&
+    amount >= minimum &&
+    amount <= maximum;
+  const messages: Record<string, string> = {
+    setup: "Online contributions will open soon.",
+    funded: "Fully funded. Thank you for bringing this story to life!",
+    closed: "Contributions for this project are closed.",
+    paused: "Contributions are temporarily paused.",
+    reserved:
+      "The remaining funds are reserved by checkouts in progress. Please check again shortly.",
+  };
 
   return (
     <article
@@ -106,76 +125,113 @@ export default function ProjectCard({ project: p }: { project: AdminProject }) {
           </div>
         </div>
 
-        <div>
-          <div className="mb-3 text-[11px] uppercase tracking-[0.22em] text-muted">
-            Be a part of it
-          </div>
-          <div className="flex flex-wrap gap-2.5">
-            {tiers.map((label, ti) => {
-              const on = pick === ti;
-              return (
+        {funding?.checkoutAvailable ? (
+          <>
+            <div>
+              <div className="mb-3 text-[11px] uppercase tracking-[0.22em] text-muted">
+                Be a part of it
+              </div>
+              <div className="flex flex-wrap gap-2.5">
+                {p.options.map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    disabled={value < minimum || value > maximum}
+                    aria-pressed={!customOpen && amount === value}
+                    onClick={() => {
+                      setAmount(value);
+                      setCustomOpen(false);
+                    }}
+                    className={`min-h-11 border border-gold px-4 py-3 text-sm disabled:opacity-30 ${!customOpen && amount === value ? "bg-gold text-ink" : "text-gold"}`}
+                  >
+                    {fmtINR(value)}
+                  </button>
+                ))}
                 <button
-                  key={label}
                   type="button"
-                  onClick={() => setPick(ti)}
-                  aria-pressed={on}
-                  className={`min-h-11 cursor-pointer border border-[rgba(217,178,60,.45)] px-[18px] py-3 text-[13px] tracking-[0.06em] tabular-nums transition-all duration-300 ${
-                    on
-                      ? "-translate-y-0.5 bg-gold text-ink"
-                      : "bg-transparent text-gold-soft hover:bg-[rgba(217,178,60,.12)]"
-                  }`}
+                  aria-pressed={customOpen}
+                  onClick={() => setCustomOpen(true)}
+                  className="min-h-11 border border-gold px-4 py-3 text-sm text-gold"
                 >
-                  {label}
+                  Custom
                 </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {customOpen && (
-          <div className="flex flex-col gap-3">
-            <div className="flex items-baseline justify-between gap-4">
-              <span className="text-[11px] uppercase tracking-[0.22em] text-muted-3">
-                Your amount
-              </span>
-              <span className="font-display text-[clamp(24px,2.2vw,34px)] leading-none text-gold tabular-nums">
-                {fmtINR(custom)}
-              </span>
+                {!p.options.some((v) => v >= minimum && v <= maximum) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAmount(maximum);
+                      setCustomOpen(true);
+                    }}
+                    className="min-h-11 border border-gold px-4 py-3 text-sm text-gold"
+                  >
+                    Contribute remaining {fmtINR(maximum)}
+                  </button>
+                )}
+              </div>
             </div>
-            <input
-              className="ap-range"
-              type="range"
-              min={1000}
-              max={200000}
-              step={1000}
-              value={custom}
-              onChange={(e) => setCustom(+e.target.value)}
-              style={
-                {
-                  "--fill": `${(((custom - 1000) / 199000) * 100).toFixed(1)}%`,
-                } as React.CSSProperties
-              }
-              aria-label="Custom contribution amount"
-            />
-            <div className="flex justify-between text-[11px] uppercase tracking-[0.16em] text-[#6f6a63]">
-              <span>₹1,000</span>
-              <span>₹2,00,000</span>
-            </div>
-          </div>
+            {customOpen && (
+              <label className="text-sm text-muted">
+                Your amount (₹)
+                <input
+                  className="payment-amount-input mt-2"
+                  aria-label="Custom contribution amount"
+                  type="number"
+                  inputMode="decimal"
+                  min={minimum}
+                  max={maximum}
+                  step={0.01}
+                  value={Number.isNaN(amount) ? "" : amount}
+                  onChange={(e) =>
+                    setAmount(
+                      e.target.value === "" ? NaN : Number(e.target.value),
+                    )
+                  }
+                />
+              </label>
+            )}
+            <p className="text-xs text-muted">
+              Available now: {fmtINR(funding.availablePaise / 100)}
+              {funding.reservedPaise > 0
+                ? ` · ${fmtINR(funding.reservedPaise / 100)} in other checkouts`
+                : ""}
+            </p>
+            {!validAmount && (
+              <p className="text-sm text-gold">
+                Choose an amount (up to two decimal places) between{" "}
+                {fmtINR(minimum)} and {fmtINR(maximum)}.
+              </p>
+            )}
+            <button
+              type="button"
+              disabled={!validAmount}
+              onClick={() => setCheckout(true)}
+              className="payment-primary mt-auto"
+            >
+              Contribute {Number.isFinite(amount) ? fmtINR(amount) : ""} ↗
+            </button>
+            <p className="text-xs leading-relaxed text-muted">
+              Secure checkout with Cashfree. Review this project’s contribution
+              and refund terms before paying.
+            </p>
+          </>
+        ) : (
+          <p className="payment-unavailable" role="status">
+            {funding
+              ? messages[funding.status] ||
+                (funding.availablePaise < 100
+                  ? "The remaining amount is below the ₹1 minimum for online payments."
+                  : "Online contributions are currently unavailable.")
+              : "Checking contribution availability…"}
+          </p>
         )}
-
-        <a
-          href={payHref}
-          className="mt-auto flex items-center justify-center gap-4 bg-gold px-7 py-5 text-center text-[12.5px] font-semibold uppercase tracking-[0.22em] text-ink transition-all duration-300 hover:-translate-y-[3px] hover:bg-gold-light hover:text-ink"
-        >
-          Contribute {fmtINR(amount)} <span className="text-sm">↗</span>
-        </a>
-
-        <p className="m-0 text-[12px] font-light leading-[1.6] text-[#6f6a63]">
-          Every contribution gets a producer credit, a first-cut screening
-          invite, and a signed script page. We&apos;ll share payment details and
-          paperwork over email.
-        </p>
+        {checkout && funding && (
+          <ContributionForm
+            project={p}
+            funding={funding}
+            amount={amount}
+            onClose={() => setCheckout(false)}
+          />
+        )}
       </div>
     </article>
   );

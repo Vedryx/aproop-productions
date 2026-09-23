@@ -6,7 +6,7 @@ let text = await readFile(path, "utf8").catch((error) => {
   throw error;
 });
 const defaults = {
-  MONGODB_URI: "mongodb://127.0.0.1:27019",
+  MONGODB_URI: "mongodb://127.0.0.1:27019/?directConnection=true",
   MONGODB_DB: "aproop",
   APP_ORIGIN: "http://localhost:3000",
   ADMIN_EMAIL: "admin@aproop.local",

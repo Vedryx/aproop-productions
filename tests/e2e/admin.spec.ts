@@ -300,7 +300,7 @@ test("story editor and immediate homepage stars publish the selected story", asy
     await expect(
       publicPage
         .locator(`#story-${created.id}`)
-        .getByRole("link", { name: "Contribute ₹1,000" }),
+        .getByText("Online contributions will open soon.", { exact: true }),
     ).toBeVisible();
     await publicPage.close();
     await page.getByRole("button", { name: /05 Be the producer/ }).click();
