@@ -1,3 +1,4 @@
+import { withDiagnostics } from "@/lib/server/diagnostics";
 import { z } from "zod";
 import { setFeatured } from "@/lib/admin/featured";
 import { getSession } from "@/lib/admin/auth";
@@ -10,8 +11,7 @@ import {
   readJson,
   sameOrigin,
 } from "@/lib/admin/http";
-import { revalidatePath } from "next/cache";
-export async function GET() {
+async function handleGET() {
   try {
     if (!(await getSession()))
       throw new HttpError("Please sign in again.", 401);
@@ -20,7 +20,7 @@ export async function GET() {
     return failure(error);
   }
 }
-export async function PUT(request: Request) {
+async function handlePUT(request: Request) {
   try {
     sameOrigin(request);
     const session = await getSession();
@@ -38,15 +38,13 @@ export async function PUT(request: Request) {
         "Another tab saved changes. Reload the editor before trying again; your changes have not overwritten theirs.",
         409,
       );
-    revalidatePath("/");
-    revalidatePath("/be-the-producer");
     return json({ ...parsed.data, revision: parsed.data.revision + 1 });
   } catch (error) {
     return failure(error);
   }
 }
 
-export async function PATCH(request: Request) {
+async function handlePATCH(request: Request) {
   try {
     sameOrigin(request);
     const session = await getSession();
@@ -79,10 +77,14 @@ export async function PATCH(request: Request) {
         "Another tab changed the content. Reload before updating homepage stars.",
         409,
       );
-    revalidatePath("/");
-    revalidatePath("/be-the-producer");
     return json({ ...updated, revision: updated.revision + 1 });
   } catch (error) {
     return failure(error);
   }
 }
+
+export const GET = withDiagnostics("/api/admin/content", handleGET);
+
+export const PUT = withDiagnostics("/api/admin/content", handlePUT);
+
+export const PATCH = withDiagnostics("/api/admin/content", handlePATCH);

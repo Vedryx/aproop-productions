@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { lockBodyScroll } from "@/lib/scroll-lock";
 
 export const INTRO_SEEN_KEY = "ap-intro-seen";
 
@@ -40,19 +41,19 @@ export default function IntroClap() {
       // Private mode or blocked storage: the intro just plays again next time.
     }
 
-    document.body.style.overflow = "hidden";
+    const unlock = lockBodyScroll();
     // Deep links (/#producer) must keep their target, so only reset when the
     // visitor is genuinely landing at the top.
     if (!window.location.hash) window.scrollTo({ top: 0 });
 
     const t = window.setTimeout(() => {
-      document.body.style.overflow = "";
+      unlock();
       markSeen();
     }, 2900);
 
     return () => {
       window.clearTimeout(t);
-      document.body.style.overflow = "";
+      unlock();
     };
   }, []);
 

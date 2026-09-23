@@ -10,21 +10,27 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
  * before React hydrates and attaches it, so on mount we also inspect an
  * already-settled image for a zero intrinsic width.
  */
-export default function SafeImg({
-  src,
-  alt,
-  className,
-  style,
-  width,
-  height,
-}: {
+type Props = {
   src: string;
   alt: string;
   className?: string;
   style?: CSSProperties;
   width?: number;
   height?: number;
-}) {
+};
+
+export default function SafeImg(props: Props) {
+  return <ImageWithFallback key={props.src} {...props} />;
+}
+
+function ImageWithFallback({
+  src,
+  alt,
+  className,
+  style,
+  width,
+  height,
+}: Props) {
   const [failed, setFailed] = useState(false);
   const ref = useRef<HTMLImageElement>(null);
 

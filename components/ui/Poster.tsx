@@ -18,7 +18,11 @@ const MIN_WIDTH = 200;
 const LETTERBOXED = 1.5;
 const UNBOX = "scale-[1.3333]";
 
-export default function Poster({ vid, alt }: { vid: string; alt: string }) {
+export default function Poster(props: { vid: string; alt: string }) {
+  return <PosterImage key={props.vid} {...props} />;
+}
+
+function PosterImage({ vid, alt }: { vid: string; alt: string }) {
   const [step, setStep] = useState(0);
   const [boxed, setBoxed] = useState(false);
 

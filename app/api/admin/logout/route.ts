@@ -1,6 +1,7 @@
+import { withDiagnostics } from "@/lib/server/diagnostics";
 import { deleteSession } from "@/lib/admin/auth";
 import { failure, json, sameOrigin } from "@/lib/admin/http";
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   try {
     sameOrigin(request);
     await deleteSession();
@@ -9,3 +10,5 @@ export async function POST(request: Request) {
     return failure(error);
   }
 }
+
+export const POST = withDiagnostics("/api/admin/logout", handlePOST);

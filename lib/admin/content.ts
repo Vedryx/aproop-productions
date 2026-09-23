@@ -4,6 +4,12 @@ import { shelfData } from "@/lib/data";
 import { projects } from "@/lib/producer";
 import { database } from "./db";
 import { contentSchema, type Content } from "./schema";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { publicContentCacheIdentity } from "./cache-policy";
+
+function cacheIdentity() {
+  return publicContentCacheIdentity(process.env.MONGODB_URI || "", process.env.MONGODB_DB || "aproop");
+}
 
 const publishable = [
   "kind",
@@ -104,9 +110,15 @@ export async function saveContent(
         $inc: { revision: 1 },
       },
     );
-  return result.modifiedCount === 1;
+  if (result.modifiedCount !== 1) return false;
+  // Expire rather than serve stale once: publication and withdrawal must be
+  // visible on the first request after the admin receives a successful save.
+  revalidateTag(cacheIdentity().tag, { expire: 0 });
+  revalidatePath("/");
+  revalidatePath("/be-the-producer");
+  return true;
 }
-export async function getPublicContent() {
+async function readPublishedContent() {
   const content = await getContent();
   return {
     shelves: content.shelves.map((s) => ({
@@ -115,4 +127,11 @@ export async function getPublicContent() {
     })),
     projects: content.projects.filter((p) => p.published),
   };
+}
+
+export function getPublicContent() {
+  const { key, tag } = cacheIdentity();
+  // This app uses the existing rendering model, not Cache Components. Keep its
+  // supported Data Cache API to avoid a site-wide rendering/streaming migration.
+  return unstable_cache(readPublishedContent, key, { tags: [tag], revalidate: 300 })();
 }

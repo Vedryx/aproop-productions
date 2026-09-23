@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { fmtINR, formatClosingDate } from "@/lib/producer";
-import type { AdminProject } from "@/lib/admin/schema";
+import type { PublicProject } from "@/lib/public-content";
 import SafeImg from "@/components/ui/SafeImg";
 
 const META_LABEL =
@@ -10,7 +10,7 @@ const META_LABEL =
 const META_VALUE = "text-sm text-muted-2";
 const PANEL_LABEL = "mb-2 text-[11px] uppercase tracking-[0.22em] text-muted";
 
-export default function ProjectCard({ project: p }: { project: AdminProject }) {
+export default function ProjectCard({ project: p }: { project: PublicProject }) {
   // The design opens on the second tier (₹10,000) and seeds Custom at ₹25,000.
   const [pick, setPick] = useState(Math.min(1, p.options.length - 1));
   const [custom, setCustom] = useState(25000);

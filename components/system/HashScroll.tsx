@@ -12,7 +12,9 @@ import { useEffect } from "react";
  */
 export default function HashScroll() {
   useEffect(() => {
-    const id = decodeURIComponent(window.location.hash.slice(1));
+    let id: string;
+    try { id = decodeURIComponent(window.location.hash.slice(1)); }
+    catch { return; }
     if (!id) return;
 
     const jump = () => {

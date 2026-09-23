@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 import { authenticatedApi } from "./helpers";
 import type { Content } from "../../lib/admin/schema";
 

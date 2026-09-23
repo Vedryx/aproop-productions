@@ -2,12 +2,14 @@ import "server-only";
 import {
   createHmac,
   randomUUID,
-  scryptSync,
-  timingSafeEqual,
 } from "node:crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { database } from "./db";
+import { adminDatabase } from "./storage";
+import { createPasswordVerifier } from "./password";
+import { consumeLoginAttempt } from "./login-limits";
+
+const verifyPassword = createPasswordVerifier();
 
 export const COOKIE = "aproop_admin";
 const TTL = 8 * 60 * 60;
@@ -32,40 +34,19 @@ function credentialVersion() {
     .update(`${email}\0${password}`)
     .digest("hex");
 }
-export function credentialsMatch(email: string, password: string) {
+export async function credentialsMatch(email: string, password: string) {
   const expected = config();
-  const salt = "aproop-admin-password-comparison";
-  const validPassword = timingSafeEqual(
-    scryptSync(password, salt, 64),
-    scryptSync(expected.password, salt, 64),
-  );
+  const validPassword = await verifyPassword(password, expected.password);
   return validPassword && email.trim().toLowerCase() === expected.email;
 }
-export async function allowLogin() {
-  // One shared account-wide window also prevents bypass through spoofed proxy headers.
-  const collection = (await database()).collection<{
-    _id: string;
-    count: number;
-    expiresAt: Date;
-  }>("admin_login_limits");
-  await collection.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-  const bucket = Math.floor(Date.now() / (15 * 60 * 1000));
-  const row = await collection.findOneAndUpdate(
-    { _id: `login:${bucket}` },
-    {
-      $inc: { count: 1 },
-      $setOnInsert: { expiresAt: new Date((bucket + 2) * 15 * 60 * 1000) },
-    },
-    { upsert: true, returnDocument: "after" },
-  );
-  return !!row && row.count <= 10;
+export async function allowLogin(clientId = "unknown") {
+  return consumeLoginAttempt(await adminDatabase(), clientId);
 }
 export async function createSession() {
   const { email, key } = config();
   const id = randomUUID();
   const expiresAt = new Date(Date.now() + TTL * 1000);
-  const collection = (await database()).collection("admin_sessions");
-  await collection.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+  const collection = (await adminDatabase()).collection("admin_sessions");
   await collection.insertOne({ tokenId: id, email, expiresAt });
   const token = await new SignJWT({
     role: "admin",
@@ -109,17 +90,17 @@ export async function getSession() {
     return null;
   }
   const session = await (
-    await database()
+    await adminDatabase()
   )
     .collection("admin_sessions")
-    .findOne({ tokenId: payload.jti, expiresAt: { $gt: new Date() } });
+    .findOne({ tokenId: payload.jti, expiresAt: { $gt: new Date() } }, { projection: { _id: 0, tokenId: 1 }, timeoutMS: 3000 });
   return session ? { email: payload.sub!, tokenId: payload.jti! } : null;
 }
 export async function deleteSession() {
   const session = await getSession();
   if (session)
     await (
-      await database()
+      await adminDatabase()
     )
       .collection("admin_sessions")
       .deleteOne({ tokenId: session.tokenId });

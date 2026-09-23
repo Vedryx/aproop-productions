@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/blob-report/
+/playwright/.cache/
 
 # next.js
 /.next/
@@ -46,3 +48,8 @@ next-env.d.ts
 /playwright-report/
 /artifacts/
 .all.mjs
+
+# Local logs and Python asset-tool bytecode
+*.log
+__pycache__/
+*.py[cod]

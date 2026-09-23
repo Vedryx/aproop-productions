@@ -15,6 +15,8 @@ export type Status = "idle" | "sending" | "sent" | "error";
 export function useEnquiry(source: Source) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
+  const inFlight = useRef(false);
+  const attempt = useRef<{ payload: string; id: string } | null>(null);
   // Stamped on mount rather than during render: reading the clock while
   // rendering is impure, and on the server it would record the wrong clock
   // entirely. Zero until then, which the server reads as "not a bot".
@@ -30,24 +32,30 @@ export function useEnquiry(source: Source) {
 
   const submit = useCallback(
     async (form: HTMLFormElement) => {
+      if (inFlight.current) return false;
+      inFlight.current = true;
       setStatus("sending");
       setError("");
 
       const fd = new FormData(form);
       const get = (k: string) => String(fd.get(k) ?? "");
+      const payload = {
+        name: get("name").trim(), email: get("email").trim(),
+        kind: get("kind").trim(), note: get("note").trim(), source,
+      };
 
       try {
+        const fingerprint = JSON.stringify(payload);
+        if (attempt.current?.payload !== fingerprint)
+          attempt.current = { payload: fingerprint, id: crypto.randomUUID() };
         const res = await fetch("/api/contact", {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers: { "content-type": "application/json", "Idempotency-Key": attempt.current.id },
+          signal: AbortSignal.timeout(45_000),
           body: JSON.stringify({
-            name: get("name"),
-            email: get("email"),
-            kind: get("kind"),
-            note: get("note"),
+            ...payload,
             website: get("website"), // honeypot
             t: mountedAt.current,
-            source,
           }),
         });
         const data = (await res.json().catch(() => null)) as
@@ -59,10 +67,13 @@ export function useEnquiry(source: Source) {
           setStatus("error");
           return false;
         }
+        attempt.current = null;
       } catch {
         setError("Network trouble. Please email us directly.");
         setStatus("error");
         return false;
+      } finally {
+        inFlight.current = false;
       }
 
       form.reset();

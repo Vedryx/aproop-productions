@@ -12,12 +12,20 @@ const settings = {
   ADMIN_EMAIL: "e2e@aproop.local",
   ADMIN_PASSWORD: `test-password-${run}`,
   ADMIN_JWT_SECRET: createHash("sha256").update(run).digest("hex"),
+  // Tests must never send real enquiries using credentials from .env.local.
+  RESEND_API_KEY: "",
+  VERCEL: "0",
+  CONTACT_TRUSTED_IP_HEADER: "",
+  TRUSTED_IP_HEADER: "",
 };
 Object.assign(process.env, settings);
 export default defineConfig({
   testDir: "./tests/e2e",
   workers: 1,
   fullyParallel: false,
+  forbidOnly: !!process.env.CI,
+  updateSnapshots: "none",
+  projects: [{ name: "chromium", use: { browserName: "chromium" } }],
   timeout: 60_000,
   globalTeardown: "./tests/e2e/teardown.ts",
   use: {

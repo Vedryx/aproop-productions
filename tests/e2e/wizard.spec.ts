@@ -1,4 +1,4 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Page } from "./fixtures";
 import { authenticatedApi } from "./helpers";
 import { MongoClient } from "mongodb";
 import type { Content } from "../../lib/admin/schema";

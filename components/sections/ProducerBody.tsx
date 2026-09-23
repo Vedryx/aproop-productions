@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { AdminProject } from "@/lib/admin/schema";
+import type { PublicProject } from "@/lib/public-content";
 import PitchModal from "@/components/ui/PitchModal";
 import ProjectCard from "@/components/ui/ProjectCard";
 
 export default function ProducerBody({
   projects,
 }: {
-  projects: AdminProject[];
+  projects: PublicProject[];
 }) {
   const [pitch, setPitch] = useState(false);
 

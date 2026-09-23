@@ -23,7 +23,8 @@ const LIMITS: Record<keyof Enquiry, number> = {
   source: 16,
 };
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+// Conservative mailbox syntax: quoted local parts and header syntax are not accepted.
+const EMAIL_RE = /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$/;
 
 /**
  * Validates and trims an untrusted body. Returns the clean enquiry, or the
@@ -32,13 +33,22 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 export function parseEnquiry(
   body: unknown,
 ): { ok: true; value: Enquiry } | { ok: false; error: string } {
-  if (typeof body !== "object" || body === null) {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return { ok: false, error: "Malformed request." };
   }
   const raw = body as Record<string, unknown>;
 
+  for (const field of ["name", "email", "kind", "note"] as const) {
+    if (raw[field] !== undefined && typeof raw[field] !== "string")
+      return { ok: false, error: "Malformed request." };
+    if (typeof raw[field] === "string" && raw[field].trim().length > LIMITS[field])
+      return { ok: false, error: `Please keep ${field} under ${LIMITS[field]} characters.` };
+  }
+  if (raw.source !== undefined && raw.source !== "contact" && raw.source !== "pitch")
+    return { ok: false, error: "Malformed request." };
+
   const str = (k: keyof Enquiry) =>
-    (typeof raw[k] === "string" ? raw[k] : "").trim().slice(0, LIMITS[k]);
+    (typeof raw[k] === "string" ? raw[k] : "").trim();
 
   const name = str("name");
   const email = str("email");
@@ -47,6 +57,8 @@ export function parseEnquiry(
   const source: Source = raw.source === "pitch" ? "pitch" : "contact";
 
   if (!name) return { ok: false, error: "Please add your name." };
+  if (/[\r\n\u0000-\u001f\u007f]/.test(name + kind))
+    return { ok: false, error: "Name and project type must be single-line text." };
   if (!EMAIL_RE.test(email)) return { ok: false, error: "Please check your email address." };
 
   return { ok: true, value: { name, email, kind, note, source } };
@@ -58,7 +70,8 @@ export function subjectFor(e: Enquiry) {
 }
 
 const esc = (s: string) =>
-  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
 export function textFor(e: Enquiry) {
   return [
@@ -83,7 +96,7 @@ export function htmlFor(e: Enquiry) {
   </div>
   <table style="border-collapse:collapse;margin-bottom:22px">
     ${row("Name", esc(e.name))}
-    ${row("Email", `<a href="mailto:${esc(e.email)}" style="color:#a8781c">${esc(e.email)}</a>`)}
+    ${row("Email", `<a href="mailto:${esc(encodeURIComponent(e.email))}" style="color:#a8781c">${esc(e.email)}</a>`)}
     ${row("Type", esc(e.kind))}
     ${row("Form", e.source === "pitch" ? "Be the Producer — pitch modal" : "Contact section")}
   </table>
