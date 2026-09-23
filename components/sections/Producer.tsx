@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { AdminProject } from "@/lib/admin/schema";
 import Eyebrow from "@/components/ui/Eyebrow";
 import SafeImg from "@/components/ui/SafeImg";
@@ -39,7 +40,7 @@ export default function Producer({ projects }: { projects: AdminProject[] }) {
         <div className="flex flex-col items-start gap-[clamp(28px,3vw,42px)]">
           <div className="relative w-full max-w-[520px] self-end pb-[34px]">
             {featured.map((project, index) => (
-              <a
+              <Link
                 key={project.id}
                 href={`${PRODUCER_HREF}#story-${project.id}`}
                 aria-label={project.title}
@@ -66,17 +67,17 @@ export default function Producer({ projects }: { projects: AdminProject[] }) {
                 >
                   {project.title}
                 </span>
-              </a>
+              </Link>
             ))}
           </div>
 
-          <a
+          <Link
             href={PRODUCER_HREF}
             className="inline-flex cursor-pointer items-center gap-[22px] border-none bg-ink px-[30px] py-[22px] text-[12.5px] font-semibold uppercase tracking-[0.22em] text-gold transition-all duration-300 hover:-translate-y-[3px] hover:bg-[#2a2622]"
             style={{ animation: "ap-attract 3.8s ease-in-out infinite" }}
           >
             Support a story <span className="text-sm">↗</span>
-          </a>
+          </Link>
         </div>
       </div>
     </section>

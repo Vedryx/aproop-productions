@@ -134,3 +134,14 @@ All six authorized implementation rounds are complete and locally verified.
 See [operations and results](OPERATIONS-AND-RESULTS.md) for measured comparisons
 and the staging/production checks that require the intended hosting environment.
 No production deployment or real email delivery was performed.
+
+## Client architecture modernization
+
+On 2026-09-24, after the six-round PR was merged, `npm run verify` passed lint,
+TypeScript, the production build, 41 unit tests and all 53 Chromium/integration
+tests. All 18 original visual baselines passed without updates. Added coverage
+checks Ky mutation retry policy, request/response deadlines, cancellation,
+response schemas, same-document navigation, anchors/history and isolated drafts.
+`npm audit --omit=dev --audit-level=high` reported zero known vulnerabilities.
+See [client architecture](CLIENT-ARCHITECTURE.md) for library decisions and the
+Node.js 22+ runtime requirement.

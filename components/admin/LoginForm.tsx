@@ -1,5 +1,5 @@
 "use client";
-import { adminRequest } from "@/lib/admin/request";
+import { adminApi } from "@/lib/api/admin";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -23,13 +23,9 @@ export default function LoginForm() {
             setError("");
             const form = new FormData(event.currentTarget);
             try {
-              await adminRequest("/api/admin/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  email: form.get("email"),
-                  password: form.get("password"),
-                }),
+              await adminApi.login({
+                email: String(form.get("email") ?? ""),
+                password: String(form.get("password") ?? ""),
               });
               router.replace("/admin");
               router.refresh();
