@@ -11,7 +11,7 @@ export default function Faq() {
     <section
       id="faq"
       data-screen-label="FAQ"
-      className="mx-auto max-w-[1320px] px-[clamp(20px,4vw,56px)] pb-[clamp(80px,9vw,140px)] pt-[clamp(60px,7vw,110px)]"
+      className="mx-auto max-w-1320px px-[clamp(20px,4vw,56px)] pb-[clamp(80px,9vw,140px)] pt-[clamp(60px,7vw,110px)]"
     >
       <Eyebrow
         top="07 / Before you ask"
@@ -43,14 +43,14 @@ export default function Faq() {
                   {`0${i + 1}`}
                 </span>
                 <span
-                  className="flex-1 font-display text-[clamp(18px,1.7vw,24px)] leading-[1.25] transition-colors duration-300"
+                  className="flex-1 font-display text-[clamp(18px,1.7vw,24px)] leading-tight transition-colors duration-300"
                   style={{ color: open ? "#d9b23c" : "#f6f1e6" }}
                 >
                   {f.q}
                 </span>
                 <span
                   aria-hidden="true"
-                  className="flex h-[34px] w-[34px] flex-none items-center justify-center self-center border border-[rgba(217,178,60,.5)] text-[17px] font-light leading-none text-gold transition-all duration-500 [transition-timing-function:cubic-bezier(.2,.7,.2,1)]"
+                  className="flex h-8.5 w-8.5 flex-none items-center justify-center self-center border border-[rgba(217,178,60,.5)] text-[17px] font-light leading-none text-gold transition-all duration-500 transition-timing-function:cubic-bezier(.2,.7,.2,1)"
                   style={{
                     transform: open ? "rotate(45deg)" : "none",
                     background: open ? "rgba(217,178,60,.14)" : "transparent",
@@ -61,7 +61,7 @@ export default function Faq() {
               </button>
 
               <div
-                className="grid transition-[grid-template-rows] duration-[550ms] [transition-timing-function:cubic-bezier(.25,.8,.25,1)]"
+                className="grid transition-[grid-template-rows] duration-550ms transition-timing-function:cubic-bezier(.25,.8,.25,1)"
                 style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
               >
                 <div className="overflow-hidden">

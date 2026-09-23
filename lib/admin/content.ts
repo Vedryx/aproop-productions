@@ -5,6 +5,15 @@ import { projects } from "@/lib/producer";
 import { database } from "./db";
 import { contentSchema, type Content } from "./schema";
 
+const publishable = [
+  "kind",
+  "ph",
+  "poster",
+  "synopsis",
+  "director",
+  "stage",
+  "closes",
+] as const satisfies readonly (keyof (typeof projects)[number])[];
 type ContentDocument = Content & {
   _id: string;
   updatedAt: Date;
@@ -22,12 +31,21 @@ function seed(): Content {
         published: true,
       })),
     })),
-    projects: projects.map((p, i) => ({
-      ...p,
-      id: randomUUID(),
-      published: true,
-      homepageSlot: i + 1,
-    })),
+    // A seed project only publishes once every field the schema demands of a
+    // published story is filled in; the rest arrive as drafts for the studio to
+    // finish. Homepage slots follow, because an unpublished story cannot hold one.
+    projects: (() => {
+      let slot = 0;
+      return projects.map((p) => {
+        const published = publishable.every((field) => p[field]);
+        return {
+          ...p,
+          id: randomUUID(),
+          published,
+          homepageSlot: published && slot < 2 ? ++slot : 0,
+        };
+      });
+    })(),
   });
 }
 export async function getContent(): Promise<Content> {

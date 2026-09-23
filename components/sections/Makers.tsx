@@ -11,7 +11,7 @@ const MAKERS = [
     num: "01",
     name: "Harish Tarun",
     role: "Writer-Director, Founder",
-    bio: "I am drawn to the poetry of everyday life. To people, their emotions, and their untold stories. For ten years, I have been finding different ways to fit these lives into a few frames. No two stories should feel the same. So I keep experimenting. A decade of stories behind me. And many more waiting to be told.",
+    bio: "I am drawn to the poetry of everyday life, to people, their emotions, and their untold stories. For ten years, I have been finding different ways to fit these lives into a few frames. No two stories should feel the same. So I keep experimenting. A decade of stories behind me. And many more waiting to be told.",
     href: "https://www.instagram.com/ugavata.harish",
     crop: { top: "-15%", left: "-102.3%", width: "418.6%" },
   },

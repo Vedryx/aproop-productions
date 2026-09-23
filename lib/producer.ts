@@ -30,8 +30,8 @@ export const projects: Project[] = [
     ph: "Datan — poster",
     poster: "/uploads/datan-poster.jpg",
     synopsis:
-      "Datan (Congestion) — a short film written and directed by Harish Tarun and the Aproop team. A story about the pressure of a life that keeps closing in, told in one tightening circle.",
-    director: "Harish Tarun & team",
+      "Datan (Congestion) — a short film written by Harish Tarun. A story about the pressure of a life that keeps closing in, told in one tightening circle.",
+    director: "Aproop team",
     stage: "Pre-production",
     closes: "December 2026",
     need: 800000,
@@ -45,7 +45,7 @@ export const projects: Project[] = [
     ph: "Bhimbhaskara — key art",
     poster: "/uploads/bhimbhaskara-keyart.jpg",
     synopsis:
-      "Bhimbhaskara — an original song based on the life and work of Dr. Bhimrao Ambedkar, written, composed and produced in-house, to be shot as a full music film.",
+      "Bhimbhaskara is an original song based on the life and work of Dr. Bhimrao Ambedkar, written, composed and produced in-house, to be shot as a full music film.",
     director: "Aproop team",
     stage: "Composition done · shoot pending",
     closes: "October 2026",
