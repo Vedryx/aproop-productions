@@ -4,47 +4,17 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 import ChoiceField, { ClosingField } from "./ChoiceField";
 import StarButton from "./StarButton";
+import { STORY_STEPS, storyIssues, storyStepFor } from "@/lib/admin/story-validation";
 import {
   STORY_FORMATS,
   PRODUCTION_STAGES,
   CONTRIBUTION_PRESETS,
 } from "@/lib/admin/editor-options";
 import {
-  projectSchema,
   imagePath,
   type AdminProject,
 } from "@/lib/admin/schema";
 import { fmtINR, formatClosingDate } from "@/lib/producer";
-
-export const STORY_STEPS = [
-  "Story details",
-  "Poster",
-  "Funding",
-  "Review & publish",
-];
-const FIELDS = [
-  ["title", "kind", "synopsis", "director", "stage", "closes"],
-  ["poster", "ph"],
-  ["need", "raised", "backers", "options"],
-  ["published", "homepageSlot"],
-];
-export function storyStepFor(field: string) {
-  return Math.max(
-    0,
-    FIELDS.findIndex((fields) => fields.includes(field)),
-  );
-}
-export function storyIssues(project: AdminProject, step?: number) {
-  const result = projectSchema.safeParse({ ...project, published: true });
-  const errors: Record<string, string> = {};
-  if (!result.success)
-    for (const issue of result.error.issues) {
-      const field = String(issue.path[0]);
-      if (step === undefined || FIELDS[step].includes(field))
-        errors[field] ??= issue.message;
-    }
-  return errors;
-}
 
 type Props = {
   project: AdminProject;

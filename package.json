@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "jose": "^6.2.12",
+    "ky": "2.1.0",
     "mongodb": "^7.6.0",
     "next": "16.3.3",
     "react": "19.2.8",
@@ -41,5 +42,8 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.13",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

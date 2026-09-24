@@ -3,6 +3,8 @@
 Next.js (App Router) + Tailwind CSS v4 implementation of the `Aproop Dark.dc.html`
 Claude Design canvas.
 
+Use Node.js **22 or newer**.
+
 ```bash
 npm run dev     # http://localhost:3000
 npm run build
@@ -142,3 +144,7 @@ See [operations and six-round results](docs/OPERATIONS-AND-RESULTS.md) for the
 implemented improvements, measured comparisons and release checks,
 [editor and lifecycle](docs/EDITOR-AND-LIFECYCLE.md) for browser/editor changes,
 and [verification](docs/VERIFICATION.md) for the complete local test record.
+
+See [client architecture](docs/CLIENT-ARCHITECTURE.md) for Ky API conventions,
+Next navigation, editor state ownership and the decisions about TanStack Query
+and Zustand.

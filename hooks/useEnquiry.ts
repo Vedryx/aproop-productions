@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ApiError } from "@/lib/api/http";
+import { submitEnquiry } from "@/lib/api/contact";
 import type { Source } from "@/lib/contact";
 
 export type Status = "idle" | "sending" | "sent" | "error";
@@ -48,28 +50,18 @@ export function useEnquiry(source: Source) {
         const fingerprint = JSON.stringify(payload);
         if (attempt.current?.payload !== fingerprint)
           attempt.current = { payload: fingerprint, id: crypto.randomUUID() };
-        const res = await fetch("/api/contact", {
-          method: "POST",
-          headers: { "content-type": "application/json", "Idempotency-Key": attempt.current.id },
-          signal: AbortSignal.timeout(45_000),
-          body: JSON.stringify({
-            ...payload,
-            website: get("website"), // honeypot
-            t: mountedAt.current,
-          }),
-        });
-        const data = (await res.json().catch(() => null)) as
-          | { ok?: boolean; error?: string }
-          | null;
-
-        if (!res.ok || !data?.ok) {
-          setError(data?.error || "Something went wrong. Please email us directly.");
-          setStatus("error");
-          return false;
-        }
+        await submitEnquiry({
+          ...payload,
+          website: get("website"), // honeypot
+          t: mountedAt.current,
+        }, attempt.current.id);
         attempt.current = null;
-      } catch {
-        setError("Network trouble. Please email us directly.");
+      } catch (error) {
+        setError(error instanceof ApiError && error.kind === "http"
+          ? error.message
+          : error instanceof ApiError && error.kind === "invalid-response"
+            ? "Something went wrong. Please email us directly."
+            : "Network trouble. Please email us directly.");
         setStatus("error");
         return false;
       } finally {

@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readJson } from "../lib/server/read-json";
 import { withDiagnostics } from "../lib/server/diagnostics";
-import { adminRequest } from "../lib/admin/request";
+import { requestJson } from "../lib/api/http";
+const decodeObject = (data: unknown) => {
+  if (!data || typeof data !== "object") throw new Error("Invalid object");
+  return data;
+};
 
 const request = (body: ReadableStream<Uint8Array>) => new Request("http://localhost", {
   method: "POST", headers: { "Content-Type": "application/json" }, body, duplex: "half",
@@ -42,17 +46,17 @@ test("admin requests handle bad responses and abort stalls without retrying muta
   let calls = 0;
   try {
     globalThis.fetch = async () => { calls++; return new Response("gateway unavailable", { status: 502 }); };
-    await assert.rejects(adminRequest("http://localhost", { method: "PUT" }), /service is unavailable/);
+    await assert.rejects(requestJson("http://localhost", { method: "PUT" }, decodeObject), /service is unavailable/);
     assert.equal(calls, 1);
     globalThis.fetch = async () => Response.json({ error: "Another tab changed the content." }, { status: 409 });
-    await assert.rejects(adminRequest("http://localhost", {}), /Another tab/);
+    await assert.rejects(requestJson("http://localhost", {}, decodeObject), /Another tab/);
     globalThis.fetch = async () => new Response("invalid JSON", { status: 200 });
-    await assert.rejects(adminRequest("http://localhost", {}), /invalid response/);
+    await assert.rejects(requestJson("http://localhost", {}, decodeObject), /invalid response/);
     let aborted = false;
-    globalThis.fetch = (_url, init) => new Promise((_resolve, reject) => {
-      init?.signal?.addEventListener("abort", () => { aborted = true; reject(new Error("abort")); });
+    globalThis.fetch = (input, init) => new Promise((_resolve, reject) => {
+      (input instanceof Request ? input.signal : init?.signal)?.addEventListener("abort", () => { aborted = true; reject(new Error("abort")); });
     });
-    await assert.rejects(adminRequest("http://localhost", { method: "PUT" }, 10), /timed out/);
+    await assert.rejects(requestJson("http://localhost", { method: "PUT" }, decodeObject, 10), /timed out/);
     assert.equal(aborted, true);
   } finally { globalThis.fetch = original; }
 });
