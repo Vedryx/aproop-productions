@@ -203,9 +203,19 @@ export const testimonials = [
     org: "Director, Adolf Solutions",
   },
   {
-    text: "Thanks to Aproop, my digital branding is stronger than ever! Their creative videos and strategy went beyond expectations and have truly helped my business grow. Wishing Harish and his team continued success!",
-    who: "Mr. Vikram Pathare",
-    org: "Co-Founder, Hotel Suraj, Parner",
+    text: "We had very little time to plan the shoot and were confused about what to show. Team Aproop, especially Harish and the team, came up with a terrific yet simple concept that we hadn't even thought of. They went beyond what was quoted and delivered many more valuable assets than expected. Really loved working with the team thank you, Harish! We'll definitely work together again.",
+    who: "Mr. Palash Hase",
+    org: "Founder, Sakav Media",
+  },
+  {
+    text: "हवं ते आणि हवे तसे काम\n'अप्रूप प्रोडक्शन' ने माझ्या डॉक्युमेंटरीचे काम अत्यंत जबाबदारीने आणि उत्कृष्ट पद्धतीने पूर्ण केले आहे. त्यांच्या टीममधील सर्जनशीलता, तांत्रिक कौशल्य आणि कामाचा दर्जा खरोखरच उत्कृष्ट आणि कौतुकास्पद आहे. विषयाची अचूक मांडणी आणि उत्तम सादरीकरण यामुळे डॉक्युमेंटरी अतिशय प्रभावी झाली आहे. वेळेत आणि दर्जेदार काम दिल्याबद्दल संपूर्ण टीमचे मनापासून आभार. भविष्यातही मला त्यांच्यासोबत पुन्हा काम करायला नक्कीच आवडेल!",
+    who: "अमित कोठारी",
+    org: "भारजा इन, केळशी",
+  },
+  {
+    text: "Aproop's Harish and Samruddhi don't just take up projects, they own it emotionally! Their BTS research works and the passion for perfection takes the projects to excellence.",
+    who: "Seema Agarwal",
+    org: "Owner, Mera Farmer",
   },
   {
     text: "Working alongside Aproop Production on our recent project was a fantastic experience. Their dedication to detail, innovative approach and commitment to meeting deadlines were truly commendable.",
